@@ -60,6 +60,25 @@ include_directories("${PROJECT_BINARY_DIR}")
 # # Include of the Boost project header files
 # include_directories(${Boost_INCLUDE_DIRS})
 
+################################################################################
+#### ADD LOGGER AND GOOGLE FLAGS
+
+### Will be added if already installed !
+
+# # add gflag
+# add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/external/gflags")
+# # add includes for gflags
+# include_directories ("${gflags_BINARY_DIR}/include")
+# # add library path for gflags
+# set(CMAKE_LIBRARY_PATH "${gflags_BINARY_DIR}/lib" ${CMAKE_LIBRARY_PATH})
+
+# add google-glog
+add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/external/google-glog")
+# add includes for google-glog
+include_directories ("${google-glog_SOURCE_DIR}/src")
+# add library path for google-glog
+set(CMAKE_LIBRARY_PATH "${google-glog_BINARY_DIR}" ${CMAKE_LIBRARY_PATH})
+
 
 ################################################################################
 #### RASTA IRP LIBRARY
@@ -72,6 +91,22 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 # set(CMAKE_CXX_FLAGS_DEBUG "-g")
 # set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+#### Use flags for c++11 and fix for maxOS
+
+# try enable c++11
+# g++ and clang++ need flags to enable c++11
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-std=c++11" HAS_CPP11)
+if (HAS_CPP11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
+
+# use libc++ on Mac OS X
+# by default clang++ will use libstdc++ w/o c++11 support
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif ()
 
 # Includes directory of sources to be able to find .h and .tpp of the project,
 include_directories("${PROJECT_SOURCE_DIR}/src")
@@ -96,7 +131,7 @@ set (PROJECT_LIB_NAME ${PROJECT_NAME})
 add_library(${PROJECT_LIB_NAME} SHARED ${RIRP_SRC_FILES})
 
 # Link boost to the library
-target_link_libraries(${PROJECT_LIB_NAME})
+target_link_libraries(${PROJECT_LIB_NAME} glog)
 
 
 # Set properties (optional)
@@ -108,7 +143,7 @@ set_target_properties(${PROJECT_LIB_NAME} PROPERTIES VERSION ${RASTA_IRP_VERSION
 ### RASTA IRP EXECUTABLE
 
 add_executable(${PROJECT_NAME}_launcher src/main/main.cpp)
-target_link_libraries(${PROJECT_NAME}_launcher ${PROJECT_LIB_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME}_launcher ${PROJECT_LIB_NAME})
 
 
 ################################################################################
