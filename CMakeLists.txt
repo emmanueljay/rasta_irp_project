@@ -61,6 +61,23 @@ include_directories("${PROJECT_BINARY_DIR}")
 # include_directories(${Boost_INCLUDE_DIRS})
 
 ################################################################################
+#### CPLEX
+  
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_extensions/)
+find_package( Cplex )
+
+# IF(CPLEX_FOUND)
+#   SET(CPLEX_INCLUDE_DIRS ${CPLEX_INCLUDE_DIR})
+#   SET(CPLEX_LIBRARIES ${CPLEX_LIBRARY};)
+#   IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+#     SET(CPLEX_LIBRARIES "${CPLEX_LIBRARIES};m;pthread")
+#   ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+# ENDIF(CPLEX_FOUND)
+
+
+
+################################################################################
 #### ADD LOGGER AND GOOGLE FLAGS
 
 ### Will be added if already installed !
