@@ -1,0 +1,63 @@
+--------------------------------
+How the solution file looks like
+
+Changelog
+v1.0	First issue	10/07/2015	Michele Quattrone/Rodrigue Fokouop
+--------------------------------
+
+
+The solution to provide to the checker for the Roadef/Euro Challenge 2016 are in Xml format. 
+
+Xml and C# are close friends. Indeed, if you check the code of the checker, you can see how easily this file is exported from the object IRP_Roadef_Challenge_Output by calling the Serialize function.
+
+A solution is a list of shifts as described inside the V1 specification document.
+
+Below you will find an example of a solution XML file, which describes 2 shifts:
+
+In the first shift (id 0), the driver 0 driving the trailer 0 starts the shift at the minute 409. He does two operations: a delivery starting at minutes 572 of 17776,7825 kg to the customer 5 and a delivery of 297, 4153 Kg starting at minutes 670 to the customer 3.
+
+In the second shift (id 1), the same vehicle starts his shift at the minute 1860. He does two operations: a loading starting at minutes 1910 of -2000 kg in the source (point 1) and a delivery of 350,5 Kg starting at minutes 2100 to the customer 4.
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<IRP_Roadef_Challenge_Output xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Shifts>
+    <IRP_Roadef_Challenge_Shift_>
+      <index>0</index>
+      <driver>0</driver>
+      <trailer>0</trailer>
+      <start>409</start>
+      <operations>
+        <IRP_Roadef_Challenge_Operation_>
+          <point>5</point>
+          <arrival>572</arrival>
+          <Quantity>17776.782511520392</Quantity>
+        </IRP_Roadef_Challenge_Operation_>
+        <IRP_Roadef_Challenge_Operation_>
+          <point>3</point>
+          <arrival>670</arrival>
+          <Quantity>297.41532257080053</Quantity>
+        </IRP_Roadef_Challenge_Operation_>
+      </operations>
+    </IRP_Roadef_Challenge_Shift_>
+
+ <IRP_Roadef_Challenge_Shift_>
+      <index>1</index>
+      <driver>0</driver>
+      <trailer>0</trailer>
+      <start>1860</start>
+      <operations>
+        <IRP_Roadef_Challenge_Operation_>
+          <point>1</point>
+          <arrival>1910</arrival>
+          <Quantity>-2000</Quantity>
+        </IRP_Roadef_Challenge_Operation_>
+        <IRP_Roadef_Challenge_Operation_>
+          <point>4</point>
+          <arrival>2100</arrival>
+          <Quantity>350,5</Quantity>
+        </IRP_Roadef_Challenge_Operation_>
+      </operations>
+    </IRP_Roadef_Challenge_Shift_>
+  </Shifts>
+</IRP_Roadef_Challenge_Output>
