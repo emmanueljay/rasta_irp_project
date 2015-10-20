@@ -122,18 +122,19 @@ endif()
 # use libc++ on Mac OS X
 # by default clang++ will use libstdc++ w/o c++11 support
 if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif ()
 
 # Includes directory of sources to be able to find .h and .tpp of the project,
 include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # Storage in variables of sources and includes files of the project
-file(GLOB RIRP_SRC_FILES "src/alg/*.cpp")
-file(GLOB RIRP_SRC_FILES "src/bo/*.cpp")
-file(GLOB RIRP_SRC_FILES "src/input/*.cpp")
-file(GLOB RIRP_SRC_FILES "src/output/*.cpp")
-file(GLOB RIRP_SRC_FILES "src/utils/*.cpp")
+file(GLOB RIRP_SRC_FILES 
+  "src/alg/*.cpp"
+  "src/bo/*.cpp"
+  "src/input/*.cpp"
+  "src/output/*.cpp"
+  "src/utils/*.cpp")
 
 ## Possibility of writting directly the parameter file !!! TODO
 # configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/utils/datadir.cpp.in
