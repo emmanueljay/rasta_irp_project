@@ -3,6 +3,8 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include "bo/driver.h"
+
 #include <vector>
 
 typedef std::vector<std::vector<int> > matrixInt;
@@ -15,9 +17,10 @@ private:
   int unit_m;
   int horizon_m;
   matrixInt timeMatrices_m;
+  std::vector<Driver> drivers_m;
   // drivers
   // trailers
-  // bases
+  int bases_index_m;
   // sources
   // customers
   // DistMatrices
@@ -35,6 +38,16 @@ public:
   // Time Matrices 
   matrixInt* timeMatrices() {return &timeMatrices_m;}
   int timeMatrices(int i, int j);
+
+  // Drivers
+  std::vector<Driver>* drivers() {return &drivers_m;}
+  Driver* drivers(int i);
+
+
+
+  // Horizon
+  void bases_index(int bases_index_p) {bases_index_m = bases_index_p;}
+  int bases_index() {return bases_index_m;}
 
 
 };

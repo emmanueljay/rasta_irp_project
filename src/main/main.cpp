@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
   // Initialize Google's logging library.
   FLAGS_stderrthreshold = 0;
   FLAGS_log_dir = "../logs";
-  FLAGS_v = 2; // Level of logging for debug
+  FLAGS_v = 3; // Level of logging for debug
   google::InitGoogleLogging(argv[0]);
 
 
@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
   // Debug log
   VLOG(1) << "I'm printed when you run the program with --v=1 or higher";
   VLOG(2) << "I'm printed when you run the program with --v=2 or higher";
+  VLOG(3) << "I'm printed when you run the program with --v=3 or higher";
 
   // Common log
   LOG(INFO)
@@ -57,5 +58,7 @@ int main(int argc, char* argv[])
   else 
     rip::reader::load_instance(&data, argv[1]);
     
+
+
   return 0;
 }
