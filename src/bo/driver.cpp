@@ -9,9 +9,10 @@
  */
 
 // Time Windows 
-timeWindow* timeWindows(int i);  
+timeWindow* Driver::timeWindows(int i)
 {
   if (i < timeWindows_m.size()) 
     return(&(timeWindows_m[i]));
   else LOG(ERROR) <<"Trying to access element out of the array of Time Windows";
+  return NULL;
 }

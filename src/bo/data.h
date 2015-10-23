@@ -10,8 +10,8 @@
 
 #include <vector>
 
-typedef std::vector<std::vector<int> > matrixInt;
-typedef std::vector<std::vector<double> > matrixDouble;
+typedef std::vector< std::vector<int> > matrixInt;
+typedef std::vector< std::vector<double> > matrixDouble;
 
 /**
  * Class Data
@@ -67,7 +67,6 @@ public:
   // Dist Matrices 
   matrixDouble* distMatrices() {return &distMatrices_m;}
   double distMatrices(int i, int j);
-
 
 };
 
