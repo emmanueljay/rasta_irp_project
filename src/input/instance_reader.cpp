@@ -157,20 +157,89 @@ int load_drivers(Data* data_p, rapidxml::xml_node<>* drivers_node_p)
   return drivers_size;
 }
 
+
 /** Helper function to load all trailers */
 int load_trailers (Data* data_p, rapidxml::xml_node<>* trailers_node_p)
 {
   VLOG(2) << "Loading trailers" ;
-  VLOG(2) << " TODO !";
-  return 0;
+  rapidxml::xml_node<>* trailer_node_p = trailers_node_p->first_node();
+  matrixInt* timeMat = data_p->timeMatrices();
+
+  int trailers_size = 0;
+  do 
+  {
+    // Creating a New Trailer Object, adding it to the vector in data.
+    std::vector<Trailer>* trailers_l = data_p->trailers();
+    int driver_index_l = trailers_l->size();
+    trailers_l->emplace_back(Trailer());
+    Trailer* trailer_l = &(trailers_l->at(driver_index_l));
+    VLOG(2) << "--- TRAILER " << driver_index_l << " ---";
+
+    // Index 
+    rapidxml::xml_node<> *child_l = trailer_node_p->first_node();
+    check_name(child_l,"index");
+    trailer_l->index(std::stoi(child_l->value()));
+    VLOG(2) << "index = " << trailer_l->index();
+
+    // Capacity
+    child_l = child_l->next_sibling();
+    check_name(child_l,"Capacity");
+    trailer_l->capacity(std::stoi(child_l->value()));
+    VLOG(2) << "Capacity = " << trailer_l->capacity();
+
+    // Initial Quantity
+    child_l = child_l->next_sibling();
+    check_name(child_l,"InitialQuantity");
+    trailer_l->initialQuantity(std::stoi(child_l->value()));
+    VLOG(2) << "InitialQuantity = " << trailer_l->initialQuantity();
+
+    // Distance Cost
+    child_l = child_l->next_sibling();
+    check_name(child_l,"DistanceCost");
+    trailer_l->distanceCost(std::stoi(child_l->value()));
+    VLOG(2) << "DistanceCost = " << trailer_l->distanceCost();
+
+    trailers_size++;
+    trailer_node_p = trailer_node_p->next_sibling();
+  }
+  while(trailer_node_p);  
+  return trailers_size;
 }
 
 /** Helper function to load all sources */
 int load_sources (Data* data_p, rapidxml::xml_node<>* sources_node_p)
 {
   VLOG(2) << "Loading sources" ;
-  VLOG(2) << " TODO !";
-  return 0;
+  rapidxml::xml_node<>* source_node_p = sources_node_p->first_node();
+  matrixInt* timeMat = data_p->timeMatrices();
+
+  int sources_size = 0;
+  do 
+  {
+    // Creating a New Source Object, adding it to the vector in data.
+    std::vector<Source>* sources_l = data_p->sources();
+    int driver_index_l = sources_l->size();
+    sources_l->emplace_back(Source());
+    Source* source_l = &(sources_l->at(driver_index_l));
+    VLOG(2) << "--- SOURCE " << driver_index_l << " ---";
+
+    // Index 
+    rapidxml::xml_node<> *child_l = source_node_p->first_node();
+    check_name(child_l,"index");
+    source_l->index(std::stoi(child_l->value()));
+    VLOG(2) << "index = " << source_l->index();
+
+    // Setup Time
+    child_l = child_l->next_sibling();
+    check_name(child_l,"setupTime");
+    source_l->setupTime(std::stoi(child_l->value()));
+    VLOG(2) << "setupTime = " << source_l->setupTime();
+
+    sources_size++;
+    source_node_p = source_node_p->next_sibling();
+  }
+  while(source_node_p);  
+  return sources_size;
 }
 
 /** Helper function to load all customers */

@@ -4,10 +4,14 @@
 #define DATA_H
 
 #include "bo/driver.h"
+#include "bo/trailer.h"
+#include "bo/source.h"
+#include "bo/customer.h"
 
 #include <vector>
 
 typedef std::vector<std::vector<int> > matrixInt;
+
 /**
  * Class Data
  * 
@@ -18,12 +22,12 @@ private:
   int horizon_m;
   matrixInt timeMatrices_m;
   std::vector<Driver> drivers_m;
-  // drivers
-  // trailers
+  std::vector<Trailer> trailers_m;
   int bases_index_m;
-  // sources
-  // customers
+  std::vector<Source> sources_m;
+  std::vector<Customer> customers_m;
   // DistMatrices
+  
 public:
   Data(/* args */) = default;
 
@@ -43,11 +47,22 @@ public:
   std::vector<Driver>* drivers() {return &drivers_m;}
   Driver* drivers(int i);
 
+  // Trailers
+  std::vector<Trailer>* trailers() {return &trailers_m;}
+  Trailer* trailers(int i);
 
-
-  // Horizon
+  // Bases 
   void bases_index(int bases_index_p) {bases_index_m = bases_index_p;}
   int bases_index() {return bases_index_m;}
+
+  // Sources
+  std::vector<Source>* sources() {return &sources_m;}
+  Source* sources(int i);
+
+  // Customers
+  std::vector<Customer>* customers() {return &customers_m;}
+  Customer* customers(int i);
+
 
 
 };
