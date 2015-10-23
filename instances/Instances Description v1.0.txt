@@ -1,0 +1,47 @@
+------------------------
+Summary of the instances
+
+Changelog
+v1.0	First issue	10/07/2015	Michele Quattrone/Rodrigue Fokouop
+------------------------
+
+The updated list of the instances for the Roadef/Euro challenge 2016 are the following:
+
+
+---------------------------------------------------
+V1 instances (compliant with the V1 specifications)
+---------------------------------------------------
+
+
+Instance_V_1.1.xml
+------------------
+This instance is directly inspired by the Serious Game but we adapt it to be compliant to the V1 specifications. 
+The common points with the serious game are many, but there are some noticeable differences: 
+	-> the horizon is 30 days.
+	-> for sake of gamification, the serious game has penalties on long shifts, which is forbidden in the challenge.
+	-> in the Serious game, there is also a penalty for run-outs, which is forbidden in the challenge (and in reality too!). We changed some customer initial levels to avoid that.
+
+nb of customers: 12
+nb of drivers: 2
+nb of trailers: 2
+Optimisation horizon: 720 hours (30 days)
+
+
+Instance_V_1.2.xml
+------------------
+This is a variant of the Instance_V_1.1.xml. The most noticeable differences are the capacities of the customers' tanks.
+
+nb of customers: 12
+nb of drivers: 2
+nb of trailers: 2
+Optimisation horizon: 720 hours (30 days)
+
+
+Instance_V_1.3.xml
+-----------------------------------------
+This instance is an excerpt of a real world instance, although very small. However, it enables to test many of the characteristics of the mathematical model V1 and prepare you for harder instances.
+
+nb of customers: 53
+nb of drivers: 1
+nb of trailers: 1
+Optimisation horizon: 240 hours (10 days)
