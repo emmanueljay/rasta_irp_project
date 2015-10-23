@@ -1,4 +1,10 @@
+/** @file */
+
+#ifndef DRIVER_H
+#define DRIVER_H
+
 #include <vector>
+#include <utility>
 
 typedef std::pair<int,int> timeWindow;
 
@@ -42,3 +48,5 @@ public:
   void timeCost(int timeCost_p) {timeCost_m = timeCost_p;}
   int timeCost() {return timeCost_m;}
 };
+
+#endif // DRIVER_H

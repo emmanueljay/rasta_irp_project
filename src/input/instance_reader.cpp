@@ -8,6 +8,10 @@
 
 #include "input/instance_reader.h"
 
+#include "bo/driver.h"
+#include "bo/trailer.h"
+#include "bo/source.h"
+#include "bo/customer.h"
 // Doc for XML Parser at : http://rapidxml.sourceforge.net/manual.html
 #include "utils/rapidxml.hpp" 
 
@@ -73,6 +77,41 @@ int load_time_matrices(Data* data_p, rapidxml::xml_node<>* time_mat_node_p)
   return time_matrices_size;
 }
 
+/** Helper function to load dist matrix */
+int load_dist_matrices(Data* data_p, rapidxml::xml_node<>* dist_mat_node_p) 
+{
+  VLOG(2) << "Loading Distance Matrices";
+  rapidxml::xml_node<>* double_vector_node_l = dist_mat_node_p->first_node();
+  matrixDouble* distMat = data_p->distMatrices();
+
+  int dist_matrices_size = 0;
+  do 
+  {
+    check_name(double_vector_node_l,"ArrayOfDouble");
+
+    // Store the vector into a line of the distMatrices in data
+    distMat->emplace_back(std::vector<double>());
+    rapidxml::xml_node<>* child_l = double_vector_node_l->first_node();
+    std::string test("");
+    do {
+      check_name(child_l,"double");
+      distMat->at(dist_matrices_size).push_back(std::stof(child_l->value()));
+      test += child_l->value();
+      test += "\t";
+      child_l = child_l->next_sibling();
+    }
+    while(child_l);
+    VLOG(3) << test;
+
+    dist_matrices_size++;
+    double_vector_node_l = double_vector_node_l->next_sibling();
+  }
+  while(double_vector_node_l);
+
+  // Maybe write a test to check is matrix is square !
+  
+  return dist_matrices_size;
+}
 
 /** Helper function to load a unique drivers */
 bool load_one_driver(Data* data_p, rapidxml::xml_node<>* driver_node_p) 
@@ -101,7 +140,6 @@ bool load_one_driver(Data* data_p, rapidxml::xml_node<>* driver_node_p)
   int num_time_windows_l = 0;
   check_name(child_l,"timewindows");
   rapidxml::xml_node<>* time_wind_node_l = child_l->first_node();
-  int start_time_windows_l,end_time_windows_l;
   do {
     check_name(time_wind_node_l,"TimeWindow");
     driver_l->timeWindows()->push_back(std::make_pair(
@@ -143,7 +181,6 @@ int load_drivers(Data* data_p, rapidxml::xml_node<>* drivers_node_p)
 {
   VLOG(2) << "Loading Drivers";
   rapidxml::xml_node<>* driver_node_l = drivers_node_p->first_node();
-  matrixInt* timeMat = data_p->timeMatrices();
 
   int drivers_size = 0;
   do 
@@ -242,14 +279,100 @@ int load_sources (Data* data_p, rapidxml::xml_node<>* sources_node_p)
   return sources_size;
 }
 
+/** Helper function to load a unique drivers */
+bool load_one_customer(Data* data_p, rapidxml::xml_node<>* customer_node_p) 
+{
+  // Creating a New Customer Object, adding it to the vector in data.
+  std::vector<Customer>* customers_l = data_p->customers();
+  int customer_index_l = customers_l->size();
+  customers_l->emplace_back(Customer());
+  Customer* customer_l = &(customers_l->at(customer_index_l));
+  VLOG(2) << "--- CUSTOMER " << customer_index_l << " ---";
+
+  // Index 
+  rapidxml::xml_node<> *child_l = customer_node_p->first_node();
+  check_name(child_l,"index");
+  customer_l->index(std::stoi(child_l->value()));
+  VLOG(2) << "Customer index = " << customer_l->index();
+
+  // Setup Time
+  child_l = child_l->next_sibling();
+  check_name(child_l,"setupTime");
+  customer_l->setupTime(std::stoi(child_l->value()));
+  VLOG(2) << "setupTime = " << customer_l->setupTime();
+
+  // Allowed Trailers
+  child_l = child_l->next_sibling();
+  int num_allowed_trailers_l = 0;
+  check_name(child_l,"allowedTrailers");
+  rapidxml::xml_node<>* allowed_trailers_node_l = child_l->first_node();
+  int start_time_windows_l,end_time_windows_l;
+  do {
+    check_name(allowed_trailers_node_l,"int");
+    customer_l->allowedTrailers()->push_back(std::stoi(allowed_trailers_node_l->value()));
+    VLOG(3) << "Allowed Trailer  : " 
+      << customer_l->allowedTrailers()->at(num_allowed_trailers_l);
+    allowed_trailers_node_l = allowed_trailers_node_l->next_sibling();
+    num_allowed_trailers_l++;
+  }
+  while(allowed_trailers_node_l);
+  VLOG(2) << "Number of Allowed Trailers = " << num_allowed_trailers_l;
+
+  // Forecast
+  child_l = child_l->next_sibling();
+  int num_forecast_l = 0;
+  check_name(child_l,"Forecast");
+  rapidxml::xml_node<>* forecast_node_l = child_l->first_node();
+  customer_l->forecast()->reserve(data_p->horizon());
+  do {
+    check_name(forecast_node_l,"double");
+    customer_l->forecast()->push_back(std::stoi(forecast_node_l->value()));
+    VLOG_EVERY_N(3, 255) << "Forecast " << google::COUNTER 
+      << " : " << customer_l->forecast()->at(num_forecast_l);
+    forecast_node_l = forecast_node_l->next_sibling();
+    num_forecast_l++;
+  }
+  while(forecast_node_l);
+  VLOG(2) << "Size of forecast data = " << num_forecast_l;
+
+  // Capacity
+  child_l = child_l->next_sibling();
+  check_name(child_l,"Capacity");
+  customer_l->capacity(std::stoi(child_l->value()));
+  VLOG(2) << "Capacity = " << customer_l->capacity();
+
+  // Initial Tank Quantity
+  child_l = child_l->next_sibling();
+  check_name(child_l,"InitialTankQuantity");
+  customer_l->initialTankQuantity(std::stoi(child_l->value()));
+  VLOG(2) << "InitialTankQuantity = " << customer_l->initialTankQuantity();
+
+  // SafetyLevel
+  child_l = child_l->next_sibling();
+  check_name(child_l,"SafetyLevel");
+  customer_l->safetyLevel(std::stoi(child_l->value()));
+  VLOG(2) << "SafetyLevel = " << customer_l->safetyLevel();
+
+  return true;
+}
+
 /** Helper function to load all customers */
 int load_customers (Data* data_p, rapidxml::xml_node<>* customers_node_p)
 {
   VLOG(2) << "Loading customers" ;
-  VLOG(2) << " TODO !";
-  return 0;
-}
+  rapidxml::xml_node<>* customer_node_l = customers_node_p->first_node();
 
+  int customers_size = 0;
+  do 
+  {
+    if (!load_one_customer(data_p,customer_node_l))
+      LOG(ERROR) << "Could't load driver " << customers_size;
+    customers_size++;
+    customer_node_l = customer_node_l->next_sibling();
+  }
+  while(customer_node_l);  
+  return customers_size;
+}
 
 
 } // namespace
@@ -342,6 +465,12 @@ bool load_instance(Data* data_p, std::string const& file_p)
   check_name(child_l,"customers");
   int num_customers = load_customers(data_p, child_l);
   VLOG(1) <<  "Vector of customers loaded of size = " << num_customers;
+
+  // Time Matrices
+  child_l = child_l->next_sibling();
+  check_name(child_l,"distMatrices");
+  int size_dist_matrices = load_dist_matrices(data_p, child_l);
+  VLOG(1) <<  "Dist Matrix loaded of size = " << size_dist_matrices;
 
   // Clearing memory space
   delete[] buffer;

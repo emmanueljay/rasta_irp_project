@@ -1,3 +1,8 @@
+/** @file */
+
+#ifndef TRAILER_H
+#define TRAILER_H
+
 class Trailer {
 private:
   int index_m;
@@ -24,3 +29,5 @@ public:
   void distanceCost(int distanceCost_p) {distanceCost_m = distanceCost_p;}
   int distanceCost() {return distanceCost_m;}
 };
+
+#endif // TRAILER_H

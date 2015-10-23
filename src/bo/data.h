@@ -11,6 +11,7 @@
 #include <vector>
 
 typedef std::vector<std::vector<int> > matrixInt;
+typedef std::vector<std::vector<double> > matrixDouble;
 
 /**
  * Class Data
@@ -26,7 +27,7 @@ private:
   int bases_index_m;
   std::vector<Source> sources_m;
   std::vector<Customer> customers_m;
-  // DistMatrices
+  matrixDouble distMatrices_m;
   
 public:
   Data(/* args */) = default;
@@ -63,6 +64,9 @@ public:
   std::vector<Customer>* customers() {return &customers_m;}
   Customer* customers(int i);
 
+  // Dist Matrices 
+  matrixDouble* distMatrices() {return &distMatrices_m;}
+  double distMatrices(int i, int j);
 
 
 };

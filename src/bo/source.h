@@ -1,3 +1,8 @@
+/** @file */
+
+#ifndef SOURCE_H
+#define SOURCE_H
+
 class Source {
 private:
   int index_m;
@@ -16,3 +21,5 @@ public:
   int setupTime() {return setupTime_m;}
 
 };
+
+#endif // SOURCE_H
