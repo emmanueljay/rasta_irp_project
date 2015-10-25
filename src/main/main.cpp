@@ -7,8 +7,7 @@
 // 4. system headers.
 
 #include "CMakeParams.h"
-#include "bo/data.h"
-#include "input/instance_reader.h"
+#include "bo/context.h"
 
 #include <glog/logging.h>
 
@@ -52,11 +51,10 @@ int main(int argc, char* argv[])
 
 
   /** Instance reading test */
-  Data data;
   if (argc < 2) 
     LOG(FATAL) << "You need an instance in parameter";
   else 
-    rip::reader::load_instance(&data, argv[1]);
+    Context context(argv[1]);
     
 
 
