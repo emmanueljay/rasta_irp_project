@@ -9,6 +9,7 @@
 #include "bo/customer.h"
 
 #include <vector>
+#include <map>
 
 typedef std::vector< std::vector<int> > matrixInt;
 typedef std::vector< std::vector<double> > matrixDouble;
@@ -22,11 +23,11 @@ private:
   int unit_m;
   int horizon_m;
   matrixInt timeMatrices_m;
-  std::vector<Driver> drivers_m;
-  std::vector<Trailer> trailers_m;
+  std::map<int,Driver> drivers_m;
+  std::map<int,Trailer> trailers_m;
   int bases_index_m;
-  std::vector<Source> sources_m;
-  std::vector<Customer> customers_m;
+  std::map<int,Source> sources_m;
+  std::map<int,Customer> customers_m;
   matrixDouble distMatrices_m;
   
 public:
@@ -45,11 +46,11 @@ public:
   int timeMatrices(int i, int j);
 
   // Drivers
-  std::vector<Driver>* drivers() {return &drivers_m;}
+  std::map<int,Driver>* drivers() {return &drivers_m;}
   Driver* drivers(int i);
 
   // Trailers
-  std::vector<Trailer>* trailers() {return &trailers_m;}
+  std::map<int,Trailer>* trailers() {return &trailers_m;}
   Trailer* trailers(int i);
 
   // Bases 
@@ -57,11 +58,11 @@ public:
   int bases_index() {return bases_index_m;}
 
   // Sources
-  std::vector<Source>* sources() {return &sources_m;}
+  std::map<int,Source>* sources() {return &sources_m;}
   Source* sources(int i);
 
   // Customers
-  std::vector<Customer>* customers() {return &customers_m;}
+  std::map<int,Customer>* customers() {return &customers_m;}
   Customer* customers(int i);
 
   // Dist Matrices 

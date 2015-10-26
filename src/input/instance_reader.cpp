@@ -116,17 +116,17 @@ int load_dist_matrices(Data* data_p, rapidxml::xml_node<>* dist_mat_node_p)
 /** Helper function to load a unique drivers */
 bool load_one_driver(Data* data_p, rapidxml::xml_node<>* driver_node_p) 
 {
-  // Creating a New Driver Object, adding it to the vector in data.
-  std::vector<Driver>* drivers_l = data_p->drivers();
-  int driver_index_l = drivers_l->size();
-  drivers_l->emplace_back(Driver());
-  Driver* driver_l = &(drivers_l->at(driver_index_l));
-  VLOG(2) << "--- DRIVER " << driver_index_l << " ---";
-
   // Index 
   rapidxml::xml_node<> *child_l = driver_node_p->first_node();
   check_name(child_l,"index");
-  driver_l->index(std::stoi(child_l->value()));
+  int driver_index_l = std::stoi(child_l->value());
+  VLOG(2) << "--- DRIVER " << driver_index_l << " ---";
+
+  // Creating a New Driver Object, adding it to the vector in data.
+  std::map<int,Driver>* drivers_l = data_p->drivers();
+  drivers_l->emplace_hint(drivers_l->end(),driver_index_l,Driver());
+  Driver* driver_l = &(drivers_l->at(driver_index_l));
+  driver_l->index(driver_index_l);
   VLOG(2) << "Driver index = " << driver_l->index();
 
   // Max Driving Duration
@@ -205,17 +205,17 @@ int load_trailers (Data* data_p, rapidxml::xml_node<>* trailers_node_p)
   int trailers_size = 0;
   do 
   {
-    // Creating a New Trailer Object, adding it to the vector in data.
-    std::vector<Trailer>* trailers_l = data_p->trailers();
-    int driver_index_l = trailers_l->size();
-    trailers_l->emplace_back(Trailer());
-    Trailer* trailer_l = &(trailers_l->at(driver_index_l));
-    VLOG(2) << "--- TRAILER " << driver_index_l << " ---";
-
     // Index 
     rapidxml::xml_node<> *child_l = trailer_node_p->first_node();
     check_name(child_l,"index");
-    trailer_l->index(std::stoi(child_l->value()));
+    int trailer_index_l = std::stoi(child_l->value());
+
+    // Creating a New Trailer Object, adding it to the vector in data.
+    VLOG(2) << "--- TRAILER " << trailer_index_l << " ---";
+    std::map<int,Trailer>* trailers_l = data_p->trailers();
+    trailers_l->emplace_hint(trailers_l->end(),trailer_index_l,Trailer());
+    Trailer* trailer_l = &(trailers_l->at(trailer_index_l));
+    trailer_l->index(trailer_index_l);
     VLOG(2) << "index = " << trailer_l->index();
 
     // Capacity
@@ -253,17 +253,17 @@ int load_sources (Data* data_p, rapidxml::xml_node<>* sources_node_p)
   int sources_size = 0;
   do 
   {
-    // Creating a New Source Object, adding it to the vector in data.
-    std::vector<Source>* sources_l = data_p->sources();
-    int driver_index_l = sources_l->size();
-    sources_l->emplace_back(Source());
-    Source* source_l = &(sources_l->at(driver_index_l));
-    VLOG(2) << "--- SOURCE " << driver_index_l << " ---";
-
     // Index 
     rapidxml::xml_node<> *child_l = source_node_p->first_node();
     check_name(child_l,"index");
-    source_l->index(std::stoi(child_l->value()));
+    int source_index_l = std::stoi(child_l->value());
+
+    // Creating a New Source Object, adding it to the map in data.
+    VLOG(2) << "--- SOURCE " << source_index_l << " ---";
+    std::map<int,Source>* sources_l = data_p->sources();
+    sources_l->emplace_hint(sources_l->end(),source_index_l,Source());
+    Source* source_l = &(sources_l->at(source_index_l));
+    source_l->index();
     VLOG(2) << "index = " << source_l->index();
 
     // Setup Time
@@ -282,17 +282,18 @@ int load_sources (Data* data_p, rapidxml::xml_node<>* sources_node_p)
 /** Helper function to load a unique drivers */
 bool load_one_customer(Data* data_p, rapidxml::xml_node<>* customer_node_p) 
 {
-  // Creating a New Customer Object, adding it to the vector in data.
-  std::vector<Customer>* customers_l = data_p->customers();
-  int customer_index_l = customers_l->size();
-  customers_l->emplace_back(Customer());
-  Customer* customer_l = &(customers_l->at(customer_index_l));
-  VLOG(2) << "--- CUSTOMER " << customer_index_l << " ---";
-
   // Index 
   rapidxml::xml_node<> *child_l = customer_node_p->first_node();
   check_name(child_l,"index");
-  customer_l->index(std::stoi(child_l->value()));
+  int customer_index_l = std::stoi(child_l->value());
+
+  // Creating a New Customer Object, adding it to the vector in data.
+  VLOG(2) << "--- CUSTOMER " << customer_index_l << " ---";
+  std::map<int,Customer>* customers_l = data_p->customers();
+  customers_l->size();
+  customers_l->emplace_hint(customers_l->end(),customer_index_l,Customer());
+  Customer* customer_l = &(customers_l->at(customer_index_l));
+  customer_l->index(customer_index_l);
   VLOG(2) << "Customer index = " << customer_l->index();
 
   // Setup Time
@@ -468,7 +469,7 @@ bool load_instance(Data* data_p, std::string const& file_p)
 
   // Time Matrices
   child_l = child_l->next_sibling();
-  check_name(child_l,"distMatrices");
+  check_name(child_l,"DistMatrices");
   int size_dist_matrices = load_dist_matrices(data_p, child_l);
   VLOG(1) <<  "Dist Matrix loaded of size = " << size_dist_matrices;
 
