@@ -1,4 +1,10 @@
+/** @file */
+
+#ifndef SHIFT_H
+#define SHIFT_H
+
 #include "bo/operation.h"
+
 #include <vector> 
 
 class Shift {
@@ -14,3 +20,5 @@ public:
     index_m(index_p), driver_m(driver_p), trailer_m(trailer_p) {}
   
 };
+
+#endif // SHIFT_H
