@@ -35,38 +35,44 @@ public:
 
   // Unit
   void unit(int unit_p) {unit_m = unit_p;}
-  int unit() {return unit_m;}
+  int unit() const {return unit_m;}
 
   // Horizon
   void horizon(int horizon_p) {horizon_m = horizon_p;}
-  int horizon() {return horizon_m;}
+  int horizon() const {return horizon_m;}
 
   // Time Matrices 
   matrixInt* timeMatrices() {return &timeMatrices_m;}
+  matrixInt const& timeMatrices() const {return timeMatrices_m;}
   int timeMatrices(int i, int j);
 
   // Drivers
   std::map<int,Driver>* drivers() {return &drivers_m;}
+  std::map<int,Driver> const& drivers() const {return drivers_m;}
   Driver* drivers(int i);
 
   // Trailers
   std::map<int,Trailer>* trailers() {return &trailers_m;}
+  std::map<int,Trailer> const& trailers() const {return trailers_m;}
   Trailer* trailers(int i);
 
   // Bases 
   void bases_index(int bases_index_p) {bases_index_m = bases_index_p;}
-  int bases_index() {return bases_index_m;}
+  int bases_index() const {return bases_index_m;}
 
   // Sources
   std::map<int,Source>* sources() {return &sources_m;}
+  std::map<int,Source> const& sources() const {return sources_m;}
   Source* sources(int i);
 
   // Customers
   std::map<int,Customer>* customers() {return &customers_m;}
+  std::map<int,Customer> const& customers() const {return customers_m;}
   Customer* customers(int i);
 
   // Dist Matrices 
   matrixDouble* distMatrices() {return &distMatrices_m;}
+  matrixDouble const& distMatrices() const {return distMatrices_m;}
   double distMatrices(int i, int j);
 
 };

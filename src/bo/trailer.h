@@ -15,19 +15,19 @@ public:
 
   // index
   void index(int index_p) {index_m = index_p;}
-  int index() {return index_m;}
+  int index() const {return index_m;}
 
   // capacity
   void capacity(int capacity_p) {capacity_m = capacity_p;}
-  int capacity() {return capacity_m;}
+  int capacity() const {return capacity_m;}
 
   // initialQuantity
   void initialQuantity(int initialQuantity_p) {initialQuantity_m = initialQuantity_p;}
-  int initialQuantity() {return initialQuantity_m;}
+  int initialQuantity() const {return initialQuantity_m;}
 
   // distanceCost
   void distanceCost(int distanceCost_p) {distanceCost_m = distanceCost_p;}
-  int distanceCost() {return distanceCost_m;}
+  int distanceCost() const {return distanceCost_m;}
 };
 
 #endif // TRAILER_H

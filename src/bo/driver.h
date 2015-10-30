@@ -25,11 +25,11 @@ public:
 
   // index
   void index(int index_p) {index_m = index_p;}
-  int index() {return index_m;}
+  int index() const {return index_m;}
 
   // max driving duration
   void maxDrivingDuration(int maxDrivingDuration_p) {maxDrivingDuration_m = maxDrivingDuration_p;}
-  int maxDrivingDuration() {return maxDrivingDuration_m;}
+  int maxDrivingDuration() const {return maxDrivingDuration_m;}
 
   // Time Windows 
   std::vector<timeWindow>* timeWindows() {return &timeWindows_m;}
@@ -37,16 +37,16 @@ public:
 
   // trailer
   void trailer(int trailer_p) {trailer_m = trailer_p;}
-  int trailer() {return trailer_m;}
+  int trailer() const {return trailer_m;}
 
   // min inter shift duration
   void minInterShiftDuration(int minInterShiftDuration_p) 
     {minInterShiftDuration_m = minInterShiftDuration_p;}
-  int minInterShiftDuration() {return minInterShiftDuration_m;}
+  int minInterShiftDuration() const {return minInterShiftDuration_m;}
 
   // time cost
   void timeCost(int timeCost_p) {timeCost_m = timeCost_p;}
-  int timeCost() {return timeCost_m;}
+  int timeCost() const {return timeCost_m;}
 };
 
 #endif // DRIVER_H

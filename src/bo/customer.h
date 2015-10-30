@@ -11,40 +11,42 @@ private:
   int setupTime_m;
   std::vector<int> allowedTrailers_m;
   std::vector<double> forecast_m;
-  int capacity_m;
-  int initialTankQuantity_m;
-  int safetyLevel_m;
+  double capacity_m;
+  double initialTankQuantity_m;
+  double safetyLevel_m;
 
 public:
   Customer(/* args */) = default;
 
   // index
   void index(int index_p) {index_m = index_p;}
-  int index() {return index_m;}
+  int index() const {return index_m;}
 
   // Setup Time
   void setupTime(int setupTime_p) {setupTime_m = setupTime_p;}
-  int setupTime() {return setupTime_m;}
+  int setupTime() const {return setupTime_m;}
 
   // Allowed Trailers
   std::vector<int>* allowedTrailers() {return &allowedTrailers_m;}
-  int allowedTrailers(int i) {return allowedTrailers_m.at(i);}  
+  std::vector<int> const& allowedTrailers() const {return allowedTrailers_m;}
+  int allowedTrailers(int i) const {return allowedTrailers_m.at(i);}  
 
   // Forecast
   std::vector<double>* forecast() {return &forecast_m;}
-  double forecast(int i) {return forecast_m.at(i);}  
+  std::vector<double> const& forecast() const {return forecast_m;}
+  double forecast(int i) const {return forecast_m.at(i);}  
 
   // Capacity
-  void capacity(int capacity_p) {capacity_m = capacity_p;}
-  int capacity() {return capacity_m;}
+  void capacity(double capacity_p) {capacity_m = capacity_p;}
+  double capacity() const {return capacity_m;}
 
   // Initial Tank Quantity
-  void initialTankQuantity(int initialTankQuantity_p) {initialTankQuantity_m = initialTankQuantity_p;}
-  int initialTankQuantity() {return initialTankQuantity_m;}
+  void initialTankQuantity(double initialTankQuantity_p) {initialTankQuantity_m = initialTankQuantity_p;}
+  double initialTankQuantity() const {return initialTankQuantity_m;}
 
   // SafetyLevel
-  void safetyLevel(int safetyLevel_p) {safetyLevel_m = safetyLevel_p;}
-  int safetyLevel() {return safetyLevel_m;}
+  void safetyLevel(double safetyLevel_p) {safetyLevel_m = safetyLevel_p;}
+  double safetyLevel() const {return safetyLevel_m;}
 
 };
 
