@@ -3,6 +3,8 @@
 #ifndef TAGS_H
 #define TAGS_H
 
+#include <string>
+
 /** This file containt Macro for checking the constraints */
 
 #define SOLUTION_ADMISSIBLE 1
@@ -32,5 +34,12 @@
 /** Quality of service */
 #define QS02_RUN_OUT_AVOIDANCE 51
 
+namespace rip {
+namespace tags {
+
+std::string get_string(int i);
+
+} // namespace tags
+} // namespace rip
 
 #endif // TAGS_H
