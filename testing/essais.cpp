@@ -43,46 +43,6 @@
 // </TechnicalDetails>
 
 
-// Tests Factorial().
-
-// Tests factorial of negative numbers.
-// TEST(FactorialTest, Negative) {
-//   // This test is named "Negative", and belongs to the "FactorialTest"
-//   // test case.
-//   EXPECT_EQ(1, Factorial(-5));
-//   EXPECT_EQ(1, Factorial(-1));
-//   EXPECT_GT(Factorial(-10), 0);
-
-//   // <TechnicalDetails>
-//   //
-//   // EXPECT_EQ(expected, actual) is the same as
-//   //
-//   //   EXPECT_TRUE((expected) == (actual))
-//   //
-//   // except that it will print both the expected value and the actual
-//   // value when the assertion fails.  This is very helpful for
-//   // debugging.  Therefore in this case EXPECT_EQ is preferred.
-//   //
-//   // On the other hand, EXPECT_TRUE accepts any Boolean expression,
-//   // and is thus more general.
-//   //
-//   // </TechnicalDetails>
-// }
-
-// // Tests factorial of 0.
-// TEST(FactorialTest, Zero) {
-//   EXPECT_EQ(1, Factorial(0));
-// }
-
-// // Tests factorial of positive numbers.
-// TEST(FactorialTest, Positive) {
-//   EXPECT_EQ(1, Factorial(1));
-//   EXPECT_EQ(2, Factorial(2));
-//   EXPECT_EQ(6, Factorial(3));
-//   EXPECT_EQ(40320, Factorial(8));
-// }
-
-
 // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
 TEST(ConstraintActives, SHI02) {
   // Construction of Context
@@ -92,13 +52,29 @@ TEST(ConstraintActives, SHI02) {
   // Construction of Solution for SHI02
   std::vector<Shift>* shifts_l = context.solution()->shifts();
   Driver const& first_driver_l = context.data()->drivers()->begin()->second;
-
+  int starting_time_l = first_driver_l.timeWindows(0).first;
   shifts_l->emplace_back(
     Shift(
       shifts_l->size(), // index
       first_driver_l.index(), // driver
       first_driver_l.trailer(), // trailer
-      0));
+      starting_time_l)); // Start
+
+  shifts_l->at(0).operations_ptr()->emplace_back(
+    Operation(
+      2, // point
+      starting_time_l + 300, // arrival
+      starting_time_l + 300 + context.data()->timeMatrices(2,4), // departure
+      264 // quantity
+      ));
+
+  shifts_l->at(0).operations_ptr()->emplace_back(
+    Operation(
+      4, // point
+      starting_time_l + 300 + 12, // arrival 12 < timeMatrices(2,4)
+      starting_time_l + 300 + + 12 + context.data()->timeMatrices(4,2), // departure
+      264 // quantity
+      ));
 
   // Test 
   int shift_l,operation_l;

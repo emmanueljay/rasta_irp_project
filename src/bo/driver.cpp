@@ -10,10 +10,10 @@
  */
 
 // Time Windows 
-timeWindow* Driver::timeWindows(int i)
+timeWindow const& Driver::timeWindows(int i) const
 {
   if (i < timeWindows_m.size()) 
-    return(&(timeWindows_m[i]));
+    return(timeWindows_m[i]);
   else LOG(ERROR) <<"Trying to access element out of the array of Time Windows";
-  return NULL;
+  return std::make_pair(-1,-1);
 }

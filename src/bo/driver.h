@@ -33,7 +33,7 @@ public:
 
   // Time Windows 
   std::vector<timeWindow>* timeWindows() {return &timeWindows_m;}
-  timeWindow* timeWindows(int i);  
+  timeWindow const& timeWindows(int i) const;  
 
   // trailer
   void trailer(int trailer_p) {trailer_m = trailer_p;}

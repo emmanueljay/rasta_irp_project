@@ -21,6 +21,7 @@ public:
   
   // Getters
   std::vector<Operation> const& operations() const {return operations_m;}
+  std::vector<Operation>* operations_ptr() {return &operations_m;}
   int index() const {return index_m;}
   int driver() const {return driver_m;}
   int trailer() const {return trailer_m;}
