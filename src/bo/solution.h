@@ -25,6 +25,9 @@ public:
   Solution(Data const& data_p) : data_m(data_p) {}
   void initialize();
 
+  // Way for testing 
+  std::vector<Shift>* shifts() {return &shifts_m;}
+
   // Admssibility checks
   /**** We test the following constraints here :
    *** Drivers
@@ -45,7 +48,7 @@ public:
    ***** Exception
    * We Do not test the run out avoidance, as it is the thing we are trying to construct.
    */
-  int is_admissible (Shift* current_shift_p = NULL, Operation* current_operation_p = NULL);
+  int is_admissible (int* current_shift_p, int* current_operation_p);
 
   /**** We test the following constraints here :
    *** Drivers
@@ -54,7 +57,7 @@ public:
    *** Trailers
    * TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
    */
-  int is_shift_admissible (Shift const& s);
+  int is_shift_admissible (int s);
 
   /**** We test the following constraints here :
    *** Shifts
@@ -63,7 +66,7 @@ public:
    * SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
    * SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
    */
-  int is_operation_admissible (Shift const& s, Operation const& o);
+  int is_operation_admissible (int s, int o);
 };
 
 #endif // SOLUTION_H

@@ -44,7 +44,7 @@ public:
   // Time Matrices 
   matrixInt* timeMatrices() {return &timeMatrices_m;}
   matrixInt const& timeMatrices() const {return timeMatrices_m;}
-  int timeMatrices(int i, int j);
+  int timeMatrices(int i, int j) const;
 
   // Drivers
   std::map<int,Driver>* drivers() {return &drivers_m;}
@@ -73,7 +73,7 @@ public:
   // Dist Matrices 
   matrixDouble* distMatrices() {return &distMatrices_m;}
   matrixDouble const& distMatrices() const {return distMatrices_m;}
-  double distMatrices(int i, int j);
+  double distMatrices(int i, int j) const;
 
 };
 

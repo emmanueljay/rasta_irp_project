@@ -1,37 +1,3 @@
-// Copyright 2005, Google Inc.
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//     * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-// A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
-
-
 // This sample shows how to write a simple unit test for a function,
 // using Google C++ testing framework.
 //
@@ -43,8 +9,13 @@
 //
 // Don't forget gtest.h, which declares the testing framework.
 
-#include <limits.h>
-#include "gtest/gtest.h"
+#include "bo/context.h"
+#include "bo/tags.h"
+
+#include <gtest/gtest.h>
+#include <glog/logging.h>
+
+#include <iostream>
 
 
 // Step 2. Use the TEST macro to define your tests.
@@ -98,10 +69,10 @@
 //   // </TechnicalDetails>
 // }
 
-// Tests factorial of 0.
-TEST(EssausTest, Zero) {
-  EXPECT_EQ(1, 1);
-}
+// // Tests factorial of 0.
+// TEST(FactorialTest, Zero) {
+//   EXPECT_EQ(1, Factorial(0));
+// }
 
 // // Tests factorial of positive numbers.
 // TEST(FactorialTest, Positive) {
@@ -112,32 +83,33 @@ TEST(EssausTest, Zero) {
 // }
 
 
-// // Tests IsPrime()
+// SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
+TEST(ConstraintActives, SHI02) {
+  // Construction of Context
+  google::InitGoogleLogging("test_essais");
+  Context context("../instances/Instance_V_1.1.xml");
 
-// // Tests negative input.
-// TEST(IsPrimeTest, Negative) {
-//   // This test belongs to the IsPrimeTest test case.
+  // Construction of Solution for SHI02
+  std::vector<Shift>* shifts_l = context.solution()->shifts();
+  Driver const& first_driver_l = context.data()->drivers()->begin()->second;
 
-//   EXPECT_FALSE(IsPrime(-1));
-//   EXPECT_FALSE(IsPrime(-2));
-//   EXPECT_FALSE(IsPrime(INT_MIN));
-// }
+  shifts_l->emplace_back(
+    Shift(
+      shifts_l->size(), // index
+      first_driver_l.index(), // driver
+      first_driver_l.trailer(), // trailer
+      0));
 
-// // Tests some trivial cases.
-// TEST(IsPrimeTest, Trivial) {
-//   EXPECT_FALSE(IsPrime(0));
-//   EXPECT_FALSE(IsPrime(1));
-//   EXPECT_TRUE(IsPrime(2));
-//   EXPECT_TRUE(IsPrime(3));
-// }
+  // Test 
+  int shift_l,operation_l;
+  EXPECT_EQ(rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)),
+    rip::tags::get_string(SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT));
+}
 
-// // Tests positive input.
-// TEST(IsPrimeTest, Positive) {
-//   EXPECT_FALSE(IsPrime(4));
-//   EXPECT_TRUE(IsPrime(5));
-//   EXPECT_FALSE(IsPrime(6));
-//   EXPECT_TRUE(IsPrime(23));
-// }
+
+
+
+
 
 // Step 3. Call RUN_ALL_TESTS() in main().
 //

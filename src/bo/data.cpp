@@ -9,7 +9,7 @@
  */
 
 // Time Matrices 
-int Data::timeMatrices(int i, int j) 
+int Data::timeMatrices(int i, int j) const 
 {
   if (i < timeMatrices_m.size() && j<timeMatrices_m[i].size()) 
     return(timeMatrices_m[i][j]);
@@ -17,7 +17,7 @@ int Data::timeMatrices(int i, int j)
   return -1;
 }
 
-double Data::distMatrices(int i, int j) 
+double Data::distMatrices(int i, int j) const
 {
   if (i < distMatrices_m.size() && j<distMatrices_m[i].size()) 
     return(distMatrices_m[i][j]);

@@ -16,6 +16,10 @@ private:
   /* data */
 public:
   Context(std::string const& data_instance_p);
+
+  Solution* solution() {return &solution_m;};
+  Data* data() {return &data_m;};
+
 };
 
 #endif // CONTEXT_H

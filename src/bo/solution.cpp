@@ -62,7 +62,7 @@ void Solution::initialize()
   }
 }
 
-int Solution::is_admissible(Shift* current_shift_p, Operation* current_operation_p) 
+int Solution::is_admissible(int* current_shift_p, int* current_operation_p) 
 {
   /**** We test the following constraints here :
    *** Drivers
@@ -84,23 +84,27 @@ int Solution::is_admissible(Shift* current_shift_p, Operation* current_operation
    * We Do not test the run out avoidance, as it is the thing we are trying to construct.
    */
   
+  LOG(INFO) << "Testing admissibility of the solution";
   int current_tag; /// Will store the tag of a constraints if it is not satisfied
 
   for (std::vector<Shift>::iterator s = shifts_m.begin();
        s != shifts_m.end(); ++s)
   { 
-    current_shift_p = &(*s);
+    *current_shift_p = s - shifts_m.begin();
+    LOG(INFO) << "Treating Shift " << *current_shift_p;
     for (std::vector<Operation>::const_iterator o = s->operations().begin();
          o != s->operations().end(); ++o)
     {
+      *current_operation_p = o - s->operations().begin();
+      LOG(INFO) << "Treating Operation " << *current_operation_p;
       // Check is the operation is OK
-      current_tag = is_operation_admissible(*s,*o);
+      current_tag = is_operation_admissible(*current_shift_p,*current_operation_p);
       if (current_tag != OPERATION_ADMISSIBLE)
         return current_tag;
     }
 
     // Check is the shift is OK
-    current_tag = is_shift_admissible(*s);
+    current_tag = is_shift_admissible(*current_shift_p);
     if (current_tag != SHIFT_ADMISSIBLE)
       return current_tag;
   }
@@ -108,7 +112,7 @@ int Solution::is_admissible(Shift* current_shift_p, Operation* current_operation
   return SOLUTION_ADMISSIBLE;
 }
 
-int Solution::is_shift_admissible (Shift const& s)
+int Solution::is_shift_admissible (int s)
 {
   /**** We test the following constraints here :
    *** Drivers
@@ -116,21 +120,35 @@ int Solution::is_shift_admissible (Shift const& s)
    * DRI08_TIME_WINDOWS_OF_THE_DRIVERS
    *** Trailers
    * TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
+   *** Shift 
+   * SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
    */
   
+  // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
+  // arrival(s) ≥ departure(last(Operations(s)) + TIMEMATRIX[point(last(Operations(s)),point(final(s))]
+
   return SHIFT_ADMISSIBLE;
 }
 
-int Solution::is_operation_admissible (Shift const& s, Operation const& o)
+int Solution::is_operation_admissible (int s, int o)
 {
   /**** We test the following constraints here :
    *** Shifts
-   * SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
+   * SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (operation part)
    * SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME
    * SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
    * SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
    */
   
+  // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (operation part)
+  // arrival(o) ≥ departure(prev(o)) + TIMEMATRIX(prev(o),o)
+  std::vector<Operation> const& ops_l = shifts_m[s].operations();
+  if (o > 0)
+    if (ops_l[o].arrival() 
+        >= ops_l[o-1].departure() 
+        + data_m.timeMatrices(ops_l[o].point(),ops_l[o-1].point()))
+      return SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT;
+
   // The operation is OK
   return OPERATION_ADMISSIBLE;
 }

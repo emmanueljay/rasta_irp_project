@@ -7,16 +7,23 @@
 
 class Operation {
 private:
+  // To be exported
   int point_m;
   int arrival_m;
   int quantity_m;
+
+  // Additional information
+  int departure_m;
 public:
-  Operation(int point_p, int arrival_p, int quantity_p):
-    point_m(point_p), arrival_m(arrival_p), quantity_m(quantity_p) {}
+  Operation(int point_p, int arrival_p, int quantity_p,
+            int departure_p):
+    point_m(point_p), arrival_m(arrival_p), quantity_m(quantity_p),
+    departure_m(departure_p) {}
 
   // Getters
   int point() const {return point_m;}
   int arrival() const {return arrival_m;}
+  int departure() const {return departure_m;}
   int quantity() const {return quantity_m;}
 
   // On hold

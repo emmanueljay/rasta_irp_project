@@ -16,8 +16,8 @@ private:
   std::vector<Operation> operations_m;
 
 public:
-  Shift(int index_p, int driver_p, int trailer_p):
-    index_m(index_p), driver_m(driver_p), trailer_m(trailer_p) {}
+  Shift(int index_p, int driver_p, int trailer_p, int start_p):
+    index_m(index_p), driver_m(driver_p), trailer_m(trailer_p), start_m(start_p) {}
   
   // Getters
   std::vector<Operation> const& operations() const {return operations_m;}
