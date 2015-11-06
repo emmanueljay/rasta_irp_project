@@ -1,4 +1,4 @@
-PROJECT(rasta_irp)
+PROJECT(rasta_irp CXX)
 cmake_minimum_required(VERSION 2.8)
 
 ## Architecture set up
@@ -97,6 +97,19 @@ include_directories ("${google-glog_SOURCE_DIR}/src")
 set(CMAKE_LIBRARY_PATH "${google-glog_BINARY_DIR}" ${CMAKE_LIBRARY_PATH})
 
 
+
+################################################################################
+#### ADD GOOGLE TEST
+
+# add googletest
+add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/external/googletest")
+# add includes for googletest
+include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/external/googletest/include")
+# add library path for googletest
+set(CMAKE_LIBRARY_PATH "${googletest_BINARY_DIR}" ${CMAKE_LIBRARY_PATH})
+
+
+
 ################################################################################
 #### RASTA IRP LIBRARY
 
@@ -148,13 +161,14 @@ set (PROJECT_LIB_NAME ${PROJECT_NAME})
 # Create and link the library to the sources files
 add_library(${PROJECT_LIB_NAME} SHARED ${RIRP_SRC_FILES})
 
-# Link boost to the library
+# Link glog to the library
 target_link_libraries(${PROJECT_LIB_NAME} glog)
 
 
 # Set properties (optional)
-set_target_properties(${PROJECT_LIB_NAME} PROPERTIES VERSION ${RASTA_IRP_VERSION_STRING}
-                                           SOVERSION ${RASTA_IRP_VERSION_MAJOR})
+set_target_properties(${PROJECT_LIB_NAME} 
+  PROPERTIES VERSION ${RASTA_IRP_VERSION_STRING}
+  SOVERSION ${RASTA_IRP_VERSION_MAJOR})
 
 
 ################################################################################
@@ -163,6 +177,26 @@ set_target_properties(${PROJECT_LIB_NAME} PROPERTIES VERSION ${RASTA_IRP_VERSION
 add_executable(${PROJECT_NAME}_launcher src/main/main.cpp)
 target_link_libraries(${PROJECT_NAME}_launcher ${PROJECT_LIB_NAME})
 
+
+################################################################################
+### RASTA IRP TESTS
+
+option(BUILD_RASTA_IRP_TESTS "Build all of rasta irp tests." ON)
+
+if (BUILD_RASTA_IRP_TESTS)
+  add_executable(test_essais testing/essais.cpp)
+  target_link_libraries(test_essais ${PROJECT_LIB_NAME} gtest_main)
+  # cxx_executable(essais ../../../testing gtest_main ${PROJECT_LIB_NAME})
+  # cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
+  # cxx_executable(sample3_unittest samples gtest_main)
+  # cxx_executable(sample4_unittest samples gtest_main samples/sample4.cc)
+  # cxx_executable(sample5_unittest samples gtest_main samples/sample1.cc)
+  # cxx_executable(sample6_unittest samples gtest_main)
+  # cxx_executable(sample7_unittest samples gtest_main)
+  # cxx_executable(sample8_unittest samples gtest_main)
+  # cxx_executable(sample9_unittest samples gtest)
+  # cxx_executable(sample10_unittest samples gtest)
+endif()
 
 ################################################################################
 ### DOCUMENTATION
