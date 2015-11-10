@@ -2,6 +2,7 @@
 
 #include "bo/solution.h"
 #include "bo/tags.h"
+#include "utils/helpers.h"
 
 #include <glog/logging.h>
 
@@ -145,9 +146,22 @@ int Solution::is_operation_admissible (int s, int o)
   std::vector<Operation> const& ops_l = shifts_m[s].operations();
   if (o > 0)
     if (ops_l[o].arrival() 
-        >= ops_l[o-1].departure() 
+        < ops_l[o-1].departure() 
         + data_m.timeMatrices(ops_l[o].point(),ops_l[o-1].point()))
       return SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT;
+
+  // SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME
+  // departure(o) = arrival(o) + SetupTime(point(o))
+  int setup_time = -1; // to store the setup time
+  if (rip::helpers::is_source(ops_l[o].point(),data_m)) 
+    setup_time = data_m.sources().at(ops_l[o].point()).setupTime();
+  else 
+    setup_time = data_m.customers().at(ops_l[o].point()).setupTime();
+
+  if (ops_l[o].departure() != ops_l[o].arrival() + setup_time)
+    return SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME;
+  
+  
 
   // The operation is OK
   return OPERATION_ADMISSIBLE;

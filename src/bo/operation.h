@@ -16,9 +16,11 @@ private:
   int departure_m;
 public:
   Operation(int point_p, int arrival_p, int quantity_p,
-            int departure_p):
-    point_m(point_p), arrival_m(arrival_p), quantity_m(quantity_p),
-    departure_m(departure_p) {}
+            int delivery_time_p):
+    point_m(point_p),
+    arrival_m(arrival_p), 
+    quantity_m(quantity_p),
+    departure_m(arrival_p+delivery_time_p) {}
 
   // Getters
   int point() const {return point_m;}

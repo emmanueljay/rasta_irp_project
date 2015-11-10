@@ -11,6 +11,7 @@
 
 #include "bo/context.h"
 #include "bo/tags.h"
+#include "utils/helpers.h"
 
 #include <gtest/gtest.h>
 #include <glog/logging.h>
@@ -39,11 +40,13 @@
 // once, but it makes no guarantee on the order the tests are
 // executed.  Therefore, you should write your tests in such a way
 // that their results don't depend on their order.
-//
 // </TechnicalDetails>
 
 
-// SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
+// 
+/** SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
+ * One shift, 2 operations, to close to each other
+ */
 TEST(ConstraintActives, SHI02) {
   // Construction of Context
   google::InitGoogleLogging("test_essais");
@@ -53,6 +56,9 @@ TEST(ConstraintActives, SHI02) {
   std::vector<Shift>* shifts_l = context.solution()->shifts();
   Driver const& first_driver_l = context.data()->drivers()->begin()->second;
   int starting_time_l = first_driver_l.timeWindows(0).first;
+  int setup_time; 
+  int point_index;
+
   shifts_l->emplace_back(
     Shift(
       shifts_l->size(), // index
@@ -60,20 +66,31 @@ TEST(ConstraintActives, SHI02) {
       first_driver_l.trailer(), // trailer
       starting_time_l)); // Start
 
-  shifts_l->at(0).operations_ptr()->emplace_back(
-    Operation(
-      2, // point
-      starting_time_l + 300, // arrival
-      starting_time_l + 300 + context.data()->timeMatrices(2,4), // departure
-      264 // quantity
-      ));
+  point_index = 2;
+  if (rip::helpers::is_source(point_index,*(context.data()))) 
+    setup_time = context.data()->sources()->at(point_index).setupTime();
+  else 
+    setup_time = context.data()->customers()->at(point_index).setupTime();
 
   shifts_l->at(0).operations_ptr()->emplace_back(
     Operation(
+      2, // point
+      starting_time_l, // arrival
+      264, // quantity
+      setup_time // setup_time
+      ));
+
+  point_index = 4;
+  if (rip::helpers::is_source(point_index,*(context.data()))) 
+    setup_time = context.data()->sources()->at(point_index).setupTime();
+  else 
+    setup_time = context.data()->customers()->at(point_index).setupTime();
+  shifts_l->at(0).operations_ptr()->emplace_back(
+    Operation(
       4, // point
-      starting_time_l + 300 + 12, // arrival 12 < timeMatrices(2,4)
-      starting_time_l + 300 + + 12 + context.data()->timeMatrices(4,2), // departure
-      264 // quantity
+      starting_time_l + 12, // arrival 12 < timeMatrices(2,4)
+      264, // quantity
+      setup_time // setup_time
       ));
 
   // Test 
