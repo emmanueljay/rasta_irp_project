@@ -13,6 +13,7 @@ private:
   int driver_m;
   int trailer_m;
   int start_m;
+  int end_m;
   std::vector<Operation> operations_m;
 
 public:
@@ -26,7 +27,7 @@ public:
   int driver() const {return driver_m;}
   int trailer() const {return trailer_m;}
   int start() const {return start_m;}
-  
+  int end() const{return end_m;}
 };
 
 #endif // SHIFT_H
