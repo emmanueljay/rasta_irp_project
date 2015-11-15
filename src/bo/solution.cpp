@@ -3,7 +3,6 @@
 #include "bo/solution.h"
 #include "bo/tags.h"
 #include "utils/helpers.h"
-
 #include <glog/logging.h>
 
 void Solution::initialize()
@@ -110,6 +109,52 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
       return current_tag;
   }
 
+  //check constraint DRI01|Inter-shifts duration
+  
+  std::map<int,Driver> const& drivers_l = data_m.drivers();
+  for (std::map<int, Driver>::const_iterator driver_it = drivers_l.begin();
+       driver_it != drivers_l.end(); ++driver_it)
+    {
+      for (std::vector<Shift>::iterator s1 = shifts_m.begin();
+	   s1 != shifts_m.end(); ++s1)
+	{
+	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
+	       s2 != shifts_m.end(); ++s2)
+	    {
+	      if (not((s1->start()>s2->end()+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end()+ driver_it->second.minInterShiftDuration())))
+		{
+		  current_tag=DRI01_INTER_SHIFTS_DURATION;
+		  return current_tag;
+		}
+		  }
+		}
+	    }
+    
+  //check constraint TL01// different shifts of the same trailer cannot overlap
+  std::map<int,Trailer> const& trailers_l=data_m.trailers();
+
+  for(std::map<int,Trailer>::const_iterator trailer_it=trailers_l.begin();trailer_it!=trailers_l.end(); ++trailer_it)
+    {
+      for (std::vector<Shift>::iterator s1 = shifts_m.begin();
+	   s1 != shifts_m.end(); ++s1)
+	{
+	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
+	       s2 != shifts_m.end(); ++s2)
+	    {
+	      if (s1->trailer()==s2->trailer()) // there can be an overlap
+		{ if (not((s2->start()>s1->end())or(s1->start()>s2->end())))
+			 {
+			   current_tag=DRI01_INTER_SHIFTS_DURATION;
+			   return current_tag;
+			 }
+		 }
+	     }
+	}
+   }
+ 
+	  
+	  
+
   return SOLUTION_ADMISSIBLE;
 }
 
@@ -166,12 +211,3 @@ int Solution::is_operation_admissible (int s, int o)
   // The operation is OK
   return OPERATION_ADMISSIBLE;
 }
-
-
-
-
-
-
-
-
-
