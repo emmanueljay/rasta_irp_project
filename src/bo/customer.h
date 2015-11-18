@@ -11,6 +11,7 @@ private:
   int setupTime_m;
   std::vector<int> allowedTrailers_m;
   std::vector<double> forecast_m;
+  std::vector<double> tankQuantity_m;
   double capacity_m;
   double initialTankQuantity_m;
   double safetyLevel_m;
@@ -43,6 +44,11 @@ public:
   // Initial Tank Quantity
   void initialTankQuantity(double initialTankQuantity_p) {initialTankQuantity_m = initialTankQuantity_p;}
   double initialTankQuantity() const {return initialTankQuantity_m;}
+
+ // Tank Quantity
+  std::vector<double>* tankQuantity() {return &tankQuantity_m;}
+  std::vector<double> const& tankQuantity() const {return tankQuantity_m;}
+  double tankQuantity(int i) const {return tankQuantity_m.at(i);}  
 
   // SafetyLevel
   void safetyLevel(double safetyLevel_p) {safetyLevel_m = safetyLevel_p;}
