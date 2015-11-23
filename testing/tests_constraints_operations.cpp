@@ -49,7 +49,7 @@
  */
 TEST(ConstraintActives, SHI02) {
   // Construction of Context
-  google::InitGoogleLogging("test_essais");
+  google::InitGoogleLogging("test_constraints");
   Context context("../instances/Instance_V_1.1.xml");
 
   // Construction of Solution for SHI02
@@ -99,6 +99,41 @@ TEST(ConstraintActives, SHI02) {
     rip::tags::get_string(SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT));
 }
 
+
+// 
+/** SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME
+ * One shift, 1 operation, with departure(o) != arrival(o) + SetupTime(point(o))
+ */
+TEST(ConstraintActives, SHI03) {
+  // Construction of Context
+  Context context("../instances/Instance_V_1.1.xml");
+
+  // Construction of Solution for SHI02
+  std::vector<Shift>* shifts_l = context.solution()->shifts();
+  Driver const& first_driver_l = context.data()->drivers()->begin()->second;
+  int starting_time_l = first_driver_l.timeWindows(0).first;
+  int point_index;
+
+  shifts_l->emplace_back(
+    Shift(
+      shifts_l->size(), // index
+      first_driver_l.index(), // driver
+      first_driver_l.trailer(), // trailer
+      starting_time_l)); // Start
+
+  shifts_l->at(0).operations_ptr()->emplace_back(
+    Operation(
+      2, // point
+      starting_time_l, // arrival
+      264, // quantity
+      2 // setup_time, random
+      ));
+
+  // Test 
+  int shift_l,operation_l;
+  EXPECT_EQ(rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)),
+    rip::tags::get_string(SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME));
+}
 
 
 
