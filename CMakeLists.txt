@@ -190,7 +190,7 @@ target_link_libraries(${PROJECT_NAME}_launcher ${PROJECT_LIB_NAME})
 option(BUILD_RASTA_IRP_TESTS "Build all of rasta irp tests." ON)
 
 if (BUILD_RASTA_IRP_TESTS)
-  add_executable(test_constraints testing/tests_constraints_operations.cpp)
+  add_executable(test_constraints testing/tests_constraints_operations.cpp testing/tests_constraints_solution.cpp)
   target_link_libraries(test_constraints ${PROJECT_LIB_NAME} gtest_main)
   # cxx_executable(essais ../../../testing gtest_main ${PROJECT_LIB_NAME})
   # cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
