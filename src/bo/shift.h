@@ -13,7 +13,7 @@ private:
   int driver_m;
   int trailer_m;
   int start_m;
-  int end_m;
+
   std::vector<Operation> operations_m;
 
 public:
@@ -27,7 +27,14 @@ public:
   int driver() const {return driver_m;}
   int trailer() const {return trailer_m;}
   int start() const {return start_m;}
-  int end() const{return end_m;}
+
+  // information added for constraints.
+  int end(Data const& data_p) const {
+    return (
+      operations_m.end()-1)->departure()
+    + data_p.timeMatrices((operations_m.end()-1)->point(),data_p.bases_index());
+  }
+
 };
 
 #endif // SHIFT_H

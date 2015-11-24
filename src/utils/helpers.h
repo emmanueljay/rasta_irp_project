@@ -18,8 +18,15 @@ namespace helpers {
  * @param  Data const& data_p [description]
  * @return         [description]
  */
-bool is_source(int point_p, Data const& data_p );
+bool is_source(int point_p, Data const& data_p);
 
+/**
+ * Get the setup time for a source or a customer
+ * @param  point_p [description]
+ * @param  data_p  [description]
+ * @return         [description]
+ */
+int setup_time(int point_p, Data const& data_p);
 
 } // namespace helpers
 } // namespace rip

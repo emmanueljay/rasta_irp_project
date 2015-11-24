@@ -3,7 +3,10 @@
 #include "bo/solution.h"
 #include "bo/tags.h"
 #include "utils/helpers.h"
+
 #include <glog/logging.h>
+
+#include <algorithm>
 
 void Solution::initialize()
 {
@@ -121,7 +124,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
 	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
 	       s2 != shifts_m.end(); ++s2)
 	    {
-	      if (not((s1->start()>s2->end()+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end()+ driver_it->second.minInterShiftDuration())))
+	      if (not((s1->start()>s2->end(data_m)+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end(data_m)+ driver_it->second.minInterShiftDuration())))
 		{
 		  current_tag=DRI01_INTER_SHIFTS_DURATION;
 		  return current_tag;
@@ -142,7 +145,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
 	       s2 != shifts_m.end(); ++s2)
 	    {
 	      if (s1->trailer()==s2->trailer()) // there can be an overlap
-		{ if (not((s2->start()>s1->end())or(s1->start()>s2->end())))
+		{ if (not((s2->start()>s1->end(data_m))or(s1->start()>s2->end(data_m))))
 			 {
 			   current_tag=DRI01_INTER_SHIFTS_DURATION;
 			   return current_tag;
@@ -168,10 +171,49 @@ int Solution::is_shift_admissible (int s)
    * TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
    *** Shift 
    * SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
+   * (This last function is coded threw the end() function in shift.h)
    */
-  
-  // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
-  // arrival(s) ≥ departure(last(Operations(s)) + TIMEMATRIX[point(last(Operations(s)),point(final(s))]
+  std::vector<Operation> const& ops_l = shifts_m[s].operations();
+  Driver const& driver_l = data_m.drivers().at(shifts_m[s].driver());
+  std::vector<timeWindow> const& tws_l = driver_l.timeWindows();
+
+  // DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME
+  // For all operations o  {Operations(s)} 
+  //  If operations(s) is not final(s)
+  //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+timeMatrix(prev(o),o)
+  //  else
+  //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+ timeMatrix (o,final(s))
+  int cumulated_driving_time_l = 0;
+  if (ops_l.size() != 0) {
+    // Begin 
+    cumulated_driving_time_l += 
+      data_m.timeMatrices(data_m.bases_index(),ops_l.begin()->point());
+    // Middle
+    for (std::vector<Operation>::const_iterator o = ops_l.begin()+1;
+         o != ops_l.end(); ++o)
+      cumulated_driving_time_l += data_m.timeMatrices((o-1)->point(),o->point()); 
+    // End
+    cumulated_driving_time_l +=
+      data_m.timeMatrices((ops_l.end()-1)->point(), data_m.bases_index());
+  }
+  if (cumulated_driving_time_l > driver_l.maxDrivingDuration())
+    return DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME;
+
+  // DRI08_TIME_WINDOWS_OF_THE_DRIVERS
+  // It exists at least a tw in TIMEWINDOWS(Drivers(s)), start(s)≥start(tw) and end(tw)≥end(s)
+  bool tw_found = false;
+  for (std::vector<timeWindow>::const_iterator tw = tws_l.begin();
+       tw != tws_l.end(); ++tw) {
+    if (tw->first <= shifts_m[s].start() && shifts_m[s].end(data_m) <= tw->second)
+      tw_found = true;
+  }
+  if (!tw_found) 
+    return DRI08_TIME_WINDOWS_OF_THE_DRIVERS;
+
+  // TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
+  // trailer(s) = TRAILER(driver(s))
+  if (shifts_m[s].trailer() != driver_l.trailer()) 
+    return TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE;
 
   return SHIFT_ADMISSIBLE;
 }
@@ -185,10 +227,10 @@ int Solution::is_operation_admissible (int s, int o)
    * SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
    * SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
    */
-  
+  std::vector<Operation> const& ops_l = shifts_m[s].operations();
+
   // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (operation part)
   // arrival(o) ≥ departure(prev(o)) + TIMEMATRIX(prev(o),o)
-  std::vector<Operation> const& ops_l = shifts_m[s].operations();
   if (o > 0)
     if (ops_l[o].arrival() 
         < ops_l[o-1].departure() 
@@ -206,7 +248,26 @@ int Solution::is_operation_admissible (int s, int o)
   if (ops_l[o].departure() != ops_l[o].arrival() + setup_time)
     return SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME;
   
-  
+  // SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
+  // For all s,o : if point(o) in CUSTOMERS then trailer(s) in ALLOWEDTRAILERS(point(o))
+  if (!rip::helpers::is_source(ops_l[o].point(),data_m)) {
+    std::vector<int> const& allowed_trail_l 
+      = data_m.customers().at(ops_l[o].point()).allowedTrailers();
+    if (std::find(allowed_trail_l.begin(),allowed_trail_l.end(), shifts_m[s].trailer())
+        == allowed_trail_l.end()) {
+      return SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER;
+    };      
+  }
+
+  // SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
+  if (rip::helpers::is_source(ops_l[o].point(),data_m)) {
+    if (ops_l[o].quantity() >= 0) 
+      return SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED;
+  }
+  else {
+    if (ops_l[o].quantity() <= 0) 
+      return SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED;
+  }
 
   // The operation is OK
   return OPERATION_ADMISSIBLE;
