@@ -220,6 +220,15 @@ int Solution::is_operation_admissible (int s, int o)
     };      
   }
 
+  // SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
+  if (rip::helpers::is_source(ops_l[o].point(),data_m)) {
+    if (ops_l[o].quantity() >= 0) 
+      return SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED;
+  }
+  else {
+    if (ops_l[o].quantity() <= 0) 
+      return SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED;
+  }
 
   // The operation is OK
   return OPERATION_ADMISSIBLE;
