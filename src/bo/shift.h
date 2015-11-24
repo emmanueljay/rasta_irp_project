@@ -13,8 +13,12 @@ private:
   int driver_m;
   int trailer_m;
   int start_m;
-  int end_m;
+
   std::vector<Operation> operations_m;
+
+  // information added for constraints, not to be exported
+  int end_m;
+
 
 public:
   Shift(int index_p, int driver_p, int trailer_p, int start_p):
@@ -27,6 +31,8 @@ public:
   int driver() const {return driver_m;}
   int trailer() const {return trailer_m;}
   int start() const {return start_m;}
+
+  // information added for constraints.
   int end() const{return end_m;}
 };
 

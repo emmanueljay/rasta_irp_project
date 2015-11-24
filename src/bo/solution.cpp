@@ -173,8 +173,34 @@ int Solution::is_shift_admissible (int s)
    * SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
    */
   
+  // DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME
+  // For all operations o  {Operations(s)} 
+  //  If operations(s) is not final(s)
+  //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+timeMatrix(prev(o),o)
+  //  else
+  //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+ timeMatrix (o,final(s))
+  int cumulated_driving_time_l = 0;
+  std::vector<Operation> const& ops_l = shifts_m[s].operations();
+  if (ops_l.size() != 0) {
+    // Begin 
+    cumulated_driving_time_l += 
+      data_m.timeMatrices(data_m.bases_index(),ops_l.begin()->point());
+    // Middle
+    for (std::vector<Operation>::const_iterator o = ops_l.begin()+1;
+         o != ops_l.end(); ++o)
+      cumulated_driving_time_l += data_m.timeMatrices((o-1)->point(),o->point()); 
+    // End
+    cumulated_driving_time_l +=
+      data_m.timeMatrices((ops_l.end()-1)->point(), data_m.bases_index());
+  }
+  if (cumulated_driving_time_l 
+      > data_m.drivers().at(shifts_m[s].driver()).maxDrivingDuration())
+    return DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME;
+
+  
   // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
   // arrival(s) ≥ departure(last(Operations(s)) + TIMEMATRIX[point(last(Operations(s)),point(final(s))]
+
 
   return SHIFT_ADMISSIBLE;
 }

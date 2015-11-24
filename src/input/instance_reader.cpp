@@ -263,7 +263,7 @@ int load_sources (Data* data_p, rapidxml::xml_node<>* sources_node_p)
     std::map<int,Source>* sources_l = data_p->sources();
     sources_l->emplace_hint(sources_l->end(),source_index_l,Source());
     Source* source_l = &(sources_l->at(source_index_l));
-    source_l->index();
+    source_l->index(source_index_l);
     VLOG(2) << "index = " << source_l->index();
 
     // Setup Time
