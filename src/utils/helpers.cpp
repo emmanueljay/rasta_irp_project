@@ -28,6 +28,12 @@ bool is_source(int point_p, Data const& data_p) {
   return false;
 }
 
+int setup_time(int point_p, Data const& data_p) {
+  if (is_source(point_p,data_p))
+    return data_p.sources().at(point_p).setupTime();
+  else 
+    return data_p.customers().at(point_p).setupTime();
+}
 
 } // namespace helpers
 } // namespace rip

@@ -3,7 +3,10 @@
 #include "bo/solution.h"
 #include "bo/tags.h"
 #include "utils/helpers.h"
+
 #include <glog/logging.h>
+
+#include <algorithm>
 
 void Solution::initialize()
 {
@@ -185,10 +188,10 @@ int Solution::is_operation_admissible (int s, int o)
    * SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
    * SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
    */
-  
+  std::vector<Operation> const& ops_l = shifts_m[s].operations();
+
   // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (operation part)
   // arrival(o) ≥ departure(prev(o)) + TIMEMATRIX(prev(o),o)
-  std::vector<Operation> const& ops_l = shifts_m[s].operations();
   if (o > 0)
     if (ops_l[o].arrival() 
         < ops_l[o-1].departure() 
@@ -206,7 +209,17 @@ int Solution::is_operation_admissible (int s, int o)
   if (ops_l[o].departure() != ops_l[o].arrival() + setup_time)
     return SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME;
   
-  
+  // SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER
+  // For all s,o : if point(o) in CUSTOMERS then trailer(s) in ALLOWEDTRAILERS(point(o))
+  if (!rip::helpers::is_source(ops_l[o].point(),data_m)) {
+    std::vector<int> const& allowed_trail_l 
+      = data_m.customers().at(ops_l[o].point()).allowedTrailers();
+    if (std::find(allowed_trail_l.begin(),allowed_trail_l.end(), shifts_m[s].trailer())
+        == allowed_trail_l.end()) {
+      return SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER;
+    };      
+  }
+
 
   // The operation is OK
   return OPERATION_ADMISSIBLE;
