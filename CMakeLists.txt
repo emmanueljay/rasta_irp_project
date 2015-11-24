@@ -79,7 +79,7 @@ IF(UNIX)
   IF(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
   ELSE(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -pthread -fPIC")
   ENDIF(APPLE)
 ENDIF(UNIX)
 
