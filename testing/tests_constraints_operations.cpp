@@ -47,7 +47,7 @@
 /** SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
  * One shift, 2 operations, to close to each other
  */
-TEST(Operations_Constraints_Actives, SHI02) {
+TEST(Operations_Constraints_Actives, SHI02_OP) {
   // Construction of Context
   google::InitGoogleLogging("test_constraints");
   Context context("../instances/Instance_V_1.1.xml");

@@ -16,10 +16,6 @@ private:
 
   std::vector<Operation> operations_m;
 
-  // information added for constraints, not to be exported
-  int end_m;
-
-
 public:
   Shift(int index_p, int driver_p, int trailer_p, int start_p):
     index_m(index_p), driver_m(driver_p), trailer_m(trailer_p), start_m(start_p) {}
@@ -33,7 +29,12 @@ public:
   int start() const {return start_m;}
 
   // information added for constraints.
-  int end() const{return end_m;}
+  int end(Data const& data_p) const {
+    return (
+      operations_m.end()-1)->departure()
+    + data_p.timeMatrices((operations_m.end()-1)->point(),data_p.bases_index());
+  }
+
 };
 
 #endif // SHIFT_H
