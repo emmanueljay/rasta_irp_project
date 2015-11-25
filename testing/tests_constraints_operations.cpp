@@ -60,11 +60,10 @@ TEST(Operations_Constraints_Actives, SHI02_OP) {
   int point_index;
 
   shifts_l->emplace_back(
-    Shift(
-      shifts_l->size(), // index
-      first_driver_l.index(), // driver
-      first_driver_l.trailer(), // trailer
-      starting_time_l)); // Start
+    shifts_l->size(), // index
+    first_driver_l.index(), // driver
+    first_driver_l.trailer(), // trailer
+    starting_time_l); // Start
 
   point_index = 2;
   setup_time = rip::helpers::setup_time(point_index,*(context.data()));
@@ -107,11 +106,10 @@ TEST(Operations_Constraints_Actives, SHI03) {
   int point_index;
 
   shifts_l->emplace_back(
-    Shift(
-      shifts_l->size(), // index
-      first_driver_l.index(), // driver
-      first_driver_l.trailer(), // trailer
-      starting_time_l)); // Start
+    shifts_l->size(), // index
+    first_driver_l.index(), // driver
+    first_driver_l.trailer(), // trailer
+    starting_time_l); // Start
 
   shifts_l->at(0).operations_ptr()->emplace_back(
     Operation(
@@ -142,11 +140,10 @@ TEST(Operations_Constraints_Actives, SHI05) {
   int point_index;
 
   shifts_l->emplace_back(
-    Shift(
-      shifts_l->size(), // index
-      driver_l.index(), // driver
-      2, // trailer that do not exist
-      starting_time_l)); // Start
+    shifts_l->size(), // index
+    driver_l.index(), // driver
+    2, // trailer that do not exist
+    starting_time_l); // Start
 
   point_index = 2;
   setup_time = rip::helpers::setup_time(point_index,*(context.data()));
@@ -179,11 +176,10 @@ TEST(Operations_Constraints_Actives, SHI11) {
   int point_index;
 
   shifts_l->emplace_back(
-    Shift(
-      shifts_l->size(), // index
-      driver_l.index(), // driver
-      driver_l.trailer(), // trailer
-      starting_time_l)); // Start
+    shifts_l->size(), // index
+    driver_l.index(), // driver
+    driver_l.trailer(), // trailer
+    starting_time_l); // Start
 
   point_index = 2;
   setup_time = rip::helpers::setup_time(point_index,*(context.data()));
