@@ -32,9 +32,12 @@ public:
   // This implementation satifies the folowing constraint : 
   // SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT (shift part)
   int end(Data const& data_p) const {
-    return (
-      operations_m.end()-1)->departure()
-    + data_p.timeMatrices((operations_m.end()-1)->point(),data_p.bases_index());
+    if (operations_m.size() == 0)
+      return start_m;
+    else
+      return (
+        operations_m.end()-1)->departure()
+      + data_p.timeMatrices((operations_m.end()-1)->point(),data_p.bases_index());
   }
 
 };

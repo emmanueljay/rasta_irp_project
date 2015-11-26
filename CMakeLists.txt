@@ -194,7 +194,8 @@ if (BUILD_RASTA_IRP_TESTS)
     test_constraints 
     testing/tests_constraints_operations.cpp 
     testing/tests_constraints_shifts.cpp 
-    testing/tests_constraints_solution.cpp)
+    testing/tests_constraints_solution.cpp
+    testing/tests_insertions.cpp)
   target_link_libraries(test_constraints ${PROJECT_LIB_NAME} gtest_main)
   # cxx_executable(essais ../../../testing gtest_main ${PROJECT_LIB_NAME})
   # cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)

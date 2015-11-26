@@ -9,15 +9,15 @@
 #include <algorithm>
 
 
-bool Solution::new_shift(int driver_id, int driver_work_id) {
+int Solution::new_shift(int driver_id, int driver_work_id) {
   // TODO : Check if the id is in the map, else return false.
-  
+  VLOG(1) << "Adding shift " << shifts_m.size();
   shifts_m.emplace_back(
     shifts_m.size(), // index
     driver_id, // driver
     data_m.drivers().at(driver_id).trailer(), // trailer
     data_m.drivers().at(driver_id).timeWindows(driver_work_id).first); // Start
-  return true;
+  return shifts_m.size()-1;
 }
 
 
@@ -33,6 +33,9 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
   }
 
   /** Insertion of the operation **/
+  VLOG(2) << "Insertion of operation " << point_index << " in shift " << shift 
+    << " at " << arrival_time << " delivering " << quantity;
+
   // 1. We find the place to insert it (we assume that the vector is already sorted ???)
   std::vector<Operation>::iterator op = shifts_m[shift].operations_ptr()->begin();
   while (op != shifts_m[shift].operations_ptr()->end() && op->departure() < arrival_time) {
@@ -53,9 +56,11 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
   // and return back the error code
   admissibility = is_admissible(&err_shift,&err_opeations);
   if (SOLUTION_ADMISSIBLE == admissibility) {
+    VLOG(2) << "Operation correctly inserted";
     return SOLUTION_ADMISSIBLE;
   }
   else {
+    VLOG(2) << "Fail with code : " << rip::tags::get_string(admissibility);
     shifts_m[shift].operations_ptr()->erase(op);
     return admissibility;
   }

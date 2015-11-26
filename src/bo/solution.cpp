@@ -112,6 +112,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
       return current_tag;
   }
 
+  LOG(INFO) << "Treating constraints related to solution ";
   //check constraint DRI01|Inter-shifts duration
   
   std::map<int,Driver> const& drivers_l = data_m.drivers();
@@ -220,6 +221,7 @@ int Solution::is_shift_admissible (int s)
   //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+timeMatrix(prev(o),o)
   //  else
   //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+ timeMatrix (o,final(s))
+  VLOG(2) << "Testing constraint : DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME";
   int cumulated_driving_time_l = 0;
   if (ops_l.size() != 0) {
     // Begin 
@@ -238,6 +240,7 @@ int Solution::is_shift_admissible (int s)
 
   // DRI08_TIME_WINDOWS_OF_THE_DRIVERS
   // It exists at least a tw in TIMEWINDOWS(Drivers(s)), start(s)≥start(tw) and end(tw)≥end(s)
+  VLOG(2) << "Testing constraint : DRI08_TIME_WINDOWS_OF_THE_DRIVERS";
   bool tw_found = false;
   for (std::vector<timeWindow>::const_iterator tw = tws_l.begin();
        tw != tws_l.end(); ++tw) {
@@ -248,6 +251,7 @@ int Solution::is_shift_admissible (int s)
     return DRI08_TIME_WINDOWS_OF_THE_DRIVERS;
 
   // TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
+  VLOG(2) << "Testing constraint : TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE";
   // trailer(s) = TRAILER(driver(s))
   if (shifts_m[s].trailer() != driver_l.trailer()) 
     return TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE;

@@ -73,9 +73,9 @@ public:
    * given driver_work (starting date at the biggining of the time window.
    * @param  driver_id      [description]
    * @param  driver_work_id [description]
-   * @return                [description]
+   * @return                id of the shift
    */
-  bool new_shift(int driver_id, int driver_work_id);
+  int new_shift(int driver_id, int driver_work_id);
 
   int insert_operation(int shift, int point_index, int arrival_time, int quantity);
 };
