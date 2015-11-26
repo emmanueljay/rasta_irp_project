@@ -155,7 +155,44 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
 	}
    }
  
-	  
+  // DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE
+  std::map<int,Customer> const& customers_l = data_m.customers();
+  for (std::map<int, Customer>::const_iterator customer_it = customers_l.begin();
+       customer_it != customers_l.end(); ++customer_it)
+    {
+      for(int h=0; h< data_m.horizon();h++)
+	{
+
+ bool capacity_respect=((customers_content_m[customer_it->first][h] >=0) and (customers_content_m[customer_it->first][h]<=customer_it->second.capacity()));
+				  if (not(capacity_respect))
+    { current_tag=DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE;
+			   return current_tag;
+    }
+	}
+    }
+
+ // SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER
+
+ for (std::vector<Shift>::iterator shift_it = shifts_m.begin();
+	   shift_it != shifts_m.end(); ++shift_it)
+   { //find the trailer number for this shift
+     int trailer_num=shift_it->trailer();
+
+     //we begin by the "final" operation in the shift 
+     for( std::vector< Operation>::const_reverse_iterator operation_it = shift_it->operations().rbegin();operation_it!= shift_it->operations().rend(); ++operation_it) 
+       { bool content_updated =(trailers_content_m.at(trailer_num)[operation_it->departure()]==trailers_content_m.at(trailer_num)[operation_it->arrival()]-operation_it->quantity());
+	 bool content_admissible=((trailers_content_m.at(trailer_num)[operation_it->departure()]>=0)and(trailers_content_m.at(trailer_num)[operation_it->departure()]<=trailers_l.at(trailer_num).capacity()));
+	 if(not((content_updated)and(content_admissible)))
+	   {
+	     current_tag=SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
+	     return current_tag;
+	   }
+       }
+   }
+	 
+
+  // SHI07_INITIAL_QUANTITY_OF_A_TRAILER_FOR_A_SHIFT_IS_THE_END_QUANTITY_OF_THE_TRAILER_FOLLOWING_THE_PREVIOUS_SHIFT
+    
 	  
 
   return SOLUTION_ADMISSIBLE;
