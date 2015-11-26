@@ -67,6 +67,15 @@ public:
    * SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED
    */
   int is_operation_admissible (int s, int o);
+
+  /**
+   * Create a new shift associated to the driver_id (and so truck) and to the
+   * given driver_work (starting date at the biggining of the time window.
+   * @param  driver_id      [description]
+   * @param  driver_work_id [description]
+   * @return                [description]
+   */
+  bool new_shift(int driver_id, int driver_work_id);
 };
 
 #endif // SOLUTION_H
