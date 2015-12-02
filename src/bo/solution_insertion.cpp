@@ -57,6 +57,11 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
   admissibility = is_admissible(&err_shift,&err_opeations);
   if (SOLUTION_ADMISSIBLE == admissibility) {
     VLOG(2) << "Operation correctly inserted";
+    // We need to update the values in solution TODO !
+    // 
+    // 
+    // 
+    // 
     return SOLUTION_ADMISSIBLE;
   }
   else {
@@ -65,3 +70,68 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
     return admissibility;
   }
 }
+
+int Solution::smart_insert_operation(int shift, int point_index, int arrival_time, int quantity) {
+  // Trying to insert the solution
+  int tag = insert_operation(shift, point_index, arrival_time, quantity);
+  VLOG(3) << rip::tags::get_string(tag);
+
+  switch (tag) 
+  {
+    case SOLUTION_ADMISSIBLE : {
+      VLOG(2) << "Operation correctly inserted";
+      return SOLUTION_ADMISSIBLE;
+      break;
+    }
+    case DRI01_INTER_SHIFTS_DURATION:
+    case TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE:
+    {
+      LOG(ERROR) << "The solution is not admissible to begin with ! Problem indep from the insertion ";
+      return ERROR_NOT_ADMISSIBLE;
+      break;
+    }
+    case DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME: 
+    case DRI08_TIME_WINDOWS_OF_THE_DRIVERS:
+    case TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME:
+    {
+      VLOG(2) << "Needs to try another shift !";
+      return TODO_MACRO;
+      break;
+    }    
+    case SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT:
+    {
+      VLOG(2) << "Needs to espace the operations, or changing the time of insertion !";
+      return TODO_MACRO;
+      break;
+    }
+    case DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE:
+    case SHI03_LOADING_AND_DELIVERY_OPERATIONS_TAKE_A_CONSTANT_TIME:
+    case SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER:
+    {
+      VLOG(2) << "Needs to change the value of quantity !";
+      return TODO_MACRO;
+      break;
+    }
+    case SHI05_DELIVERY_OPERATIONS_REQUIRE_THE_CUSTOMER_SITE_TO_BE_ACCESSIBLE_FOR_THE_TRAILER:
+    {
+      VLOG(2) << "Try another driver !";
+      return TODO_MACRO;
+      break;
+    }
+    case SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED:
+    {
+      LOG(ERROR) << "Wrong value of quantity !";
+      return ERROR_NOT_ADMISSIBLE;
+      break;
+    }
+    case SHI07_INITIAL_QUANTITY_OF_A_TRAILER_FOR_A_SHIFT_IS_THE_END_QUANTITY_OF_THE_TRAILER_FOLLOWING_THE_PREVIOUS_SHIFT:
+    {
+      LOG(ERROR) << "Coding problem, should be treated by default !";
+      return ERROR_NOT_ADMISSIBLE;
+      break;
+    }
+  }
+  LOG(ERROR) << "Tag not defined !";
+  return ERROR_NOT_ADMISSIBLE;
+}
+

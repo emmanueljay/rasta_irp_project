@@ -78,6 +78,10 @@ public:
   int new_shift(int driver_id, int driver_work_id);
 
   int insert_operation(int shift, int point_index, int arrival_time, int quantity);
+
+  int smart_insert_operation(int shift, int point_index, int arrival_time, int quantity);
+
+
 };
 
 #endif // SOLUTION_H

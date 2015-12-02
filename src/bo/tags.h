@@ -34,6 +34,10 @@
 /** Quality of service */
 #define QS02_RUN_OUT_AVOIDANCE 51
 
+/** Information Macros */
+#define ERROR_NOT_ADMISSIBLE 0
+#define TODO_MACRO -10
+
 namespace rip {
 namespace tags {
 

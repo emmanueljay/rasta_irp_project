@@ -69,6 +69,31 @@ TEST(Shifts_Insertions, Simple_test) {
 
 }
 
+/** One small test */
+TEST(Shifts_Insertions, Smart_Simple_test) {
+  // Construction of Context
+  Context context("../instances/Instance_V_1.1.xml");
+
+  // Construction of Solution for DRI03
+  std::vector<Shift>* shifts_l = context.solution()->shifts();
+  Driver const& first_driver_l = context.data()->drivers()->begin()->second;
+  int s,tag,time_l;
+
+  s = context.solution()->new_shift(first_driver_l.index(),0);
+
+  time_l = context.data()->timeMatrices(0,2) 
+    + shifts_l->at(s).start();
+  tag = context.solution()->smart_insert_operation(s, 2, time_l, 255);
+
+  // Test 
+  EXPECT_EQ(rip::tags::get_string(SOLUTION_ADMISSIBLE),
+    rip::tags::get_string(tag));
+
+  tag = context.solution()->smart_insert_operation(s, 4, time_l+30, 255);
+  EXPECT_EQ(rip::tags::get_string(SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT),
+    rip::tags::get_string(tag));
+
+}
 
 // Step 3. Call RUN_ALL_TESTS() in main().
 //

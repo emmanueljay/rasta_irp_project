@@ -40,6 +40,12 @@ std::string get_string(int i) {
       return "SHI11_SOME_PRODUCT_MUST_BE_LOADED_OR_DELIVERED" ;
     case QS02_RUN_OUT_AVOIDANCE:
       return "QS02_RUN_OUT_AVOIDANCE";
+
+    // Additional information macro
+    case ERROR_NOT_ADMISSIBLE:
+      return "ERROR_NOT_ADMISSIBLE";
+    case TODO_MACRO:
+      return "TODO_MACRO";
   }
   return "NOT DEFINED";
 }
