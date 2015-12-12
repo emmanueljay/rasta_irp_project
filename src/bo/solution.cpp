@@ -123,8 +123,8 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
 	{
 	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
 	       s2 != shifts_m.end(); ++s2)
-	    {
-	      if (not((s1->start()>s2->end(data_m)+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end(data_m)+ driver_it->second.minInterShiftDuration())))
+	    { 
+	      if ((s1!=s2)and(not((s1->start()>s2->end(data_m)+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end(data_m)+ driver_it->second.minInterShiftDuration()))))
 		{
 		  current_tag=DRI01_INTER_SHIFTS_DURATION;
 		  return current_tag;
