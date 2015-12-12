@@ -49,6 +49,9 @@
  */
 TEST(Operations_Constraints_Actives, SHI02_OP) {
   // Construction of Context
+  // FLAGS_stderrthreshold = 0;
+  // FLAGS_log_dir = "../logs";
+  // FLAGS_v = 3; // Level of logging for debug
   google::InitGoogleLogging("test_constraints");
   Context context("../instances/Instance_V_1.1.xml");
 
