@@ -7,7 +7,7 @@
 // 4. system headers.
 
 #include "CMakeParams.h"
-#include "bo/context.h"
+#include "alg/solver.h"
 #include "bo/tags.h"
 
 #include <glog/logging.h>
@@ -56,12 +56,13 @@ int main(int argc, char* argv[])
     LOG(FATAL) << "You need an instance in parameter";
   else {
     Context context(argv[1]);
-    int shift_l,operation_l;
-    int tag = context.solution()->is_admissible(&shift_l,&operation_l);
-    LOG(INFO) << rip::tags::get_string(tag);
+    StupidSolver solver(&context);
+    solver.solve();
+
+    // int shift_l,operation_l;
+    // int tag = context.solution()->is_admissible(&shift_l,&operation_l);
+    // LOG(INFO) << rip::tags::get_string(tag);
   }
     
-
-
   return 0;
 }
