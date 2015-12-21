@@ -25,6 +25,13 @@ public:
   Solution(Data const& data_p) : data_m(data_p) {}
   void initialize();
 
+  // setters and getters
+  std::vector<double> const& customers_content(int i) 
+    {return customers_content_m[i];}
+  std::vector<double> const& trailers_content(int i) 
+    {return trailers_content_m[i];}
+
+
   // Way for testing 
   std::vector<Shift>* shifts() {return &shifts_m;}
 
@@ -81,7 +88,7 @@ public:
 
   int smart_insert_operation(int shift, int point_index, int arrival_time, int quantity);
 
-
+  int insert_max(Shift* shift, Customer const& customer);
 };
 
 #endif // SOLUTION_H

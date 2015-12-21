@@ -22,7 +22,6 @@ namespace alg_bricks {
  */
 bool optimise_shift_simple(Context* context, int shift);
 
-
 } // namespace alg_bricks
 } // namespace rip
 

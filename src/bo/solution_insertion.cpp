@@ -135,3 +135,35 @@ int Solution::smart_insert_operation(int shift, int point_index, int arrival_tim
   return ERROR_NOT_ADMISSIBLE;
 }
 
+
+
+
+
+
+int Solution::insert_max(Shift* shift, Customer const& customer) {
+  VLOG(2) << "Insertion of customer " << customer.index() << " in shift " << shift->index();
+  int t = shift->end(data_m); 
+
+  // if the truck is empty, we fill it
+  // if (shift->driver())
+
+
+
+  // Update the value of t
+  // The truck is now full, put the maximum that you can in the customer, 
+  // at the end of the shift using the insertion function
+  
+
+  // DONT FORGET TO UPDATES THE QUANTITIES IN SOLUTION
+  
+
+  // Return how it went.
+  return 1;
+}
+
+
+
+
+
+
+

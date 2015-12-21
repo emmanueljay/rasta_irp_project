@@ -6,7 +6,7 @@
 
 // General solver class
 class Solver {
-private:
+protected:
   std::string name_;
   std::string description_;
 
@@ -23,6 +23,7 @@ public:
   // Setters and getters
   std::string const& name() const {return name_;}
   void name(std::string name) {name_ = name;}
+  
   std::string const& description() const {return description_;}
   void description(std::string description) {description_ = description;}
 
@@ -45,10 +46,11 @@ public:
     }
   ~StupidSolver() {} ;
 
-  bool solve() {
-    std::cout << name() << " :: " << description() << std::endl; 
-    return false;
-  }
+  /** 
+   * Find the times where an operation is needed, and affect it to a driver 
+   * in a shift 
+   **/
+  bool solve();
 };
 
 

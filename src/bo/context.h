@@ -18,7 +18,10 @@ public:
   Context(std::string const& data_instance_p);
 
   Solution* solution() {return &solution_m;};
+  Solution const& solution() const {return solution_m;};
+
   Data* data() {return &data_m;};
+  Data const& data() const {return data_m;};
 
 };
 
