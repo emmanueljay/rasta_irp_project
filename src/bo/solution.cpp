@@ -113,47 +113,44 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
   }
 
   LOG(INFO) << "Treating constraints related to solution ";
-  //check constraint DRI01|Inter-shifts duration
-  
-  std::map<int,Driver> const& drivers_l = data_m.drivers();
-  for (std::map<int, Driver>::const_iterator driver_it = drivers_l.begin();
-       driver_it != drivers_l.end(); ++driver_it)
-    {
-      for (std::vector<Shift>::iterator s1 = shifts_m.begin();
-	   s1 != shifts_m.end(); ++s1)
-	{
-	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
-	       s2 != shifts_m.end(); ++s2)
-	    { 
-	      if ((s1!=s2)and(not((s1->start()>s2->end(data_m)+ driver_it->second.minInterShiftDuration())or(s2->start()>s1->end(data_m)+ driver_it->second.minInterShiftDuration()))))
-		{
-		  current_tag=DRI01_INTER_SHIFTS_DURATION;
-		  return current_tag;
-		}
-		  }
-		}
-	    }
-    
+
+  // VLOG(2) << "Testing constraint : DRI01_INTER_SHIFTS_DURATION";
+  // DRI01_INTER_SHIFTS_DURATION
+  int intShiftDur;  // Value of intershift duration
+  for (Shift const& s1 : shifts_m)
+    for (Shift const& s2 : shifts_m) {
+      // If the shift are different with the sames drivers
+      if ((s1.index() != s2.index()) && (s1.driver() == s2.driver())) {
+        intShiftDur = data_m.drivers().at(s1.driver()).minInterShiftDuration();
+        // We exit when the shifts are too close
+        if ((s1.end(data_m) + intShiftDur < s2.start()) ||
+            (s2.end(data_m) + intShiftDur < s1.start())) {
+          current_tag = DRI01_INTER_SHIFTS_DURATION;
+          return current_tag;
+        }
+    }
+  }
+
   //check constraint TL01// different shifts of the same trailer cannot overlap
   std::map<int,Trailer> const& trailers_l=data_m.trailers();
 
   for(std::map<int,Trailer>::const_iterator trailer_it=trailers_l.begin();trailer_it!=trailers_l.end(); ++trailer_it)
     {
       for (std::vector<Shift>::iterator s1 = shifts_m.begin();
-	   s1 != shifts_m.end(); ++s1)
-	{
-	  for (std::vector<Shift>::iterator s2 = shifts_m.begin();
-	       s2 != shifts_m.end(); ++s2)
-	    {
-	      if (s1->trailer()==s2->trailer()) // there can be an overlap
-		{ if (not((s2->start()>s1->end(data_m))or(s1->start()>s2->end(data_m))))
-			 {
-			   current_tag=DRI01_INTER_SHIFTS_DURATION;
-			   return current_tag;
-			 }
-		 }
-	     }
-	}
+     s1 != shifts_m.end(); ++s1)
+  {
+    for (std::vector<Shift>::iterator s2 = shifts_m.begin();
+         s2 != shifts_m.end(); ++s2)
+      {
+        if (s1->trailer()==s2->trailer()) // there can be an overlap
+    { if (not((s2->start()>s1->end(data_m))or(s1->start()>s2->end(data_m))))
+       {
+         current_tag=DRI01_INTER_SHIFTS_DURATION;
+         return current_tag;
+       }
+     }
+       }
+  }
    }
  
   // DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE
@@ -162,39 +159,39 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
        customer_it != customers_l.end(); ++customer_it)
     {
       for(int h=0; h< data_m.horizon();h++)
-	{
+  {
 
  bool capacity_respect=((customers_content_m[customer_it->first][h] >=0) and (customers_content_m[customer_it->first][h]<=customer_it->second.capacity()));
-				  if (not(capacity_respect))
+          if (not(capacity_respect))
     { current_tag=DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE;
-			   return current_tag;
+         return current_tag;
     }
-	}
+  }
     }
 
  // SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER
 
  for (std::vector<Shift>::iterator shift_it = shifts_m.begin();
-	   shift_it != shifts_m.end(); ++shift_it)
+     shift_it != shifts_m.end(); ++shift_it)
    { //find the trailer number for this shift
      int trailer_num=shift_it->trailer();
 
      //we begin by the "final" operation in the shift 
      for( std::vector< Operation>::const_reverse_iterator operation_it = shift_it->operations().rbegin();operation_it!= shift_it->operations().rend(); ++operation_it) 
        { bool content_updated =(trailers_content_m.at(trailer_num)[operation_it->departure()]==trailers_content_m.at(trailer_num)[operation_it->arrival()]-operation_it->quantity());
-	 bool content_admissible=((trailers_content_m.at(trailer_num)[operation_it->departure()]>=0)and(trailers_content_m.at(trailer_num)[operation_it->departure()]<=trailers_l.at(trailer_num).capacity()));
-	 if(not((content_updated)and(content_admissible)))
-	   {
-	     current_tag=SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
-	     return current_tag;
-	   }
+   bool content_admissible=((trailers_content_m.at(trailer_num)[operation_it->departure()]>=0)and(trailers_content_m.at(trailer_num)[operation_it->departure()]<=trailers_l.at(trailer_num).capacity()));
+   if(not((content_updated)and(content_admissible)))
+     {
+       current_tag=SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
+       return current_tag;
+     }
        }
    }
-	 
+   
 
   // SHI07_INITIAL_QUANTITY_OF_A_TRAILER_FOR_A_SHIFT_IS_THE_END_QUANTITY_OF_THE_TRAILER_FOLLOWING_THE_PREVIOUS_SHIFT
     
-	  
+    
 
   return SOLUTION_ADMISSIBLE;
 }
@@ -221,7 +218,7 @@ int Solution::is_shift_admissible (int s)
   //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+timeMatrix(prev(o),o)
   //  else
   //   cumulatedDrivingTime(o) = cumulatedDrivingTime(prev(o))+ timeMatrix (o,final(s))
-  VLOG(2) << "Testing constraint : DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME";
+  // VLOG(2) << "Testing constraint : DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME";
   int cumulated_driving_time_l = 0;
   if (ops_l.size() != 0) {
     // Begin 
@@ -240,7 +237,7 @@ int Solution::is_shift_admissible (int s)
 
   // DRI08_TIME_WINDOWS_OF_THE_DRIVERS
   // It exists at least a tw in TIMEWINDOWS(Drivers(s)), start(s)≥start(tw) and end(tw)≥end(s)
-  VLOG(2) << "Testing constraint : DRI08_TIME_WINDOWS_OF_THE_DRIVERS";
+  // VLOG(2) << "Testing constraint : DRI08_TIME_WINDOWS_OF_THE_DRIVERS";
   bool tw_found = false;
   for (std::vector<timeWindow>::const_iterator tw = tws_l.begin();
        tw != tws_l.end(); ++tw) {
@@ -251,7 +248,7 @@ int Solution::is_shift_admissible (int s)
     return DRI08_TIME_WINDOWS_OF_THE_DRIVERS;
 
   // TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE
-  VLOG(2) << "Testing constraint : TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE";
+  // VLOG(2) << "Testing constraint : TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE";
   // trailer(s) = TRAILER(driver(s))
   if (shifts_m[s].trailer() != driver_l.trailer()) 
     return TL03_THE_TRAILER_ATTACHED_TO_A_DRIVER_IN_A_SHIFT_MUST_BE_COMPATIBLE;
