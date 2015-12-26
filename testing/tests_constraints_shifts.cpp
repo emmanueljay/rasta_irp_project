@@ -79,8 +79,8 @@ TEST(Shifts_Constraints_Actives, DRI03) {
 
   // Test 
   int shift_l,operation_l;
-  EXPECT_EQ(rip::tags::get_string(DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME),
-    rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)));
+  EXPECT_EQ(rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)),
+    rip::tags::get_string(DRI03_RESPECT_OF_MAXIMAL_DRIVING_TIME));
 }
 
 /** DRI08_TIME_WINDOWS_OF_THE_DRIVERS

@@ -114,8 +114,8 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
 
   LOG(INFO) << "Treating constraints related to solution ";
 
-  // VLOG(2) << "Testing constraint : DRI01_INTER_SHIFTS_DURATION";
   // DRI01_INTER_SHIFTS_DURATION
+  // Start (s2) > end (s1) + MININTERSHIFTDURATION (d) OR start (s1) > end (s2) + MININTERSHIFTDURATION (d)
   int intShiftDur;  // Value of intershift duration
   for (Shift const& s1 : shifts_m)
     for (Shift const& s2 : shifts_m) {
@@ -123,74 +123,67 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
       if ((s1.index() != s2.index()) && (s1.driver() == s2.driver())) {
         intShiftDur = data_m.drivers().at(s1.driver()).minInterShiftDuration();
         // We exit when the shifts are too close
-        if ((s1.end(data_m) + intShiftDur < s2.start()) ||
-            (s2.end(data_m) + intShiftDur < s1.start())) {
+        if ((s2.start() <= s1.end(data_m) + intShiftDur) &&
+            (s1.start() <= s2.end(data_m) + intShiftDur)) {
           current_tag = DRI01_INTER_SHIFTS_DURATION;
           return current_tag;
         }
+      }
     }
-  }
 
-  //check constraint TL01// different shifts of the same trailer cannot overlap
-  std::map<int,Trailer> const& trailers_l=data_m.trailers();
+  // TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME
+  // For all tl  TRAILERS For all s1, s 2  shifts(tl), start(s2) > end(s1) or start(s1) > end(s2)
+  for (Shift const& s1 : shifts_m)
+    for (Shift const& s2 : shifts_m) {
+      // If the shift are different with the sames trailer
+      if ((s1.index() != s2.index()) && (s1.trailer() == s2.trailer())) {
+        // We exit if the shift overlaps
+        if ((s2.start() <= s1.end(data_m)) && 
+            (s1.start() <= s2.end(data_m))) {
+          current_tag = TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME;
+          return current_tag;
+        }
+      }
+    }
 
-  for(std::map<int,Trailer>::const_iterator trailer_it=trailers_l.begin();trailer_it!=trailers_l.end(); ++trailer_it)
-    {
-      for (std::vector<Shift>::iterator s1 = shifts_m.begin();
-     s1 != shifts_m.end(); ++s1)
-  {
-    for (std::vector<Shift>::iterator s2 = shifts_m.begin();
-         s2 != shifts_m.end(); ++s2)
-      {
-        if (s1->trailer()==s2->trailer()) // there can be an overlap
-    { if (not((s2->start()>s1->end(data_m))or(s1->start()>s2->end(data_m))))
-       {
-         current_tag=DRI01_INTER_SHIFTS_DURATION;
-         return current_tag;
-       }
-     }
-       }
-  }
-   }
- 
   // DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE
-  std::map<int,Customer> const& customers_l = data_m.customers();
-  for (std::map<int, Customer>::const_iterator customer_it = customers_l.begin();
-       customer_it != customers_l.end(); ++customer_it)
+  // For all p CUSTOMERS, For all h  [0, H[
+  //  tankQuantity(p, h) ≤ CAPACITY(p)
+  //  0 <= tankQuantity(p, h) is asured by the safety level
+  for (std::pair<int,Customer> const& customer : data_m.customers()) {
+    for (int t = 0; t < customers_content_m[customer.first].size(); ++t)
     {
-      for(int h=0; h< data_m.horizon();h++)
-  {
-
- bool capacity_respect=((customers_content_m[customer_it->first][h] >=0) and (customers_content_m[customer_it->first][h]<=customer_it->second.capacity()));
-          if (not(capacity_respect))
-    { current_tag=DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE;
-         return current_tag;
+      if (customers_content_m[customer.first][t] > customer.second.capacity()) {
+        current_tag = DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE;
+        return current_tag;
+      }
     }
   }
+  // WE DON'T TEST THE FOLLOWING : (Assured by insertion functions)
+  // For all p  { cCUSTOMERS } tankQuantity(p,-1) = INITIALTANKQUANTITY(p) For all h  [0, H[
+  // Given that dyn = tankQuantityl(p,h-1) – FORECAST(p,h) + oOperations(p,h) quantity(o) tankQuantity(p,h) = max(dyn,0)
+
+
+  // SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER
+  // For a given shift s  SHIFTS, For all o  Operations(s) with {final(s}), 
+   // trailerQuantity(o) = trailerQuantity(prev(o)) - quantity(o) 
+   // trailerQuantity(o) ≥ 0
+   // trailerQuantity(o) ≤ CAPACITY(trailer(s))
+  // WE DON'T TEST trailerQuantity(o) = trailerQuantity(prev(o)) - quantity(o),
+  // AS IT SHOULD BE MANAGED BY THE FUNCTIONS OF INSERTION.
+  for (std::pair<int,Trailer> const& trailer : data_m.trailers()) {
+    for (int t = 0; t < trailers_content_m[trailer.first].size(); ++t)
+    {
+      if (0 > trailers_content_m[trailer.first][t] ||
+          trailers_content_m[trailer.first][t] > trailer.second.capacity()) {
+        current_tag = SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
+        return current_tag;
+      }
     }
-
- // SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER
-
- for (std::vector<Shift>::iterator shift_it = shifts_m.begin();
-     shift_it != shifts_m.end(); ++shift_it)
-   { //find the trailer number for this shift
-     int trailer_num=shift_it->trailer();
-
-     //we begin by the "final" operation in the shift 
-     for( std::vector< Operation>::const_reverse_iterator operation_it = shift_it->operations().rbegin();operation_it!= shift_it->operations().rend(); ++operation_it) 
-       { bool content_updated =(trailers_content_m.at(trailer_num)[operation_it->departure()]==trailers_content_m.at(trailer_num)[operation_it->arrival()]-operation_it->quantity());
-   bool content_admissible=((trailers_content_m.at(trailer_num)[operation_it->departure()]>=0)and(trailers_content_m.at(trailer_num)[operation_it->departure()]<=trailers_l.at(trailer_num).capacity()));
-   if(not((content_updated)and(content_admissible)))
-     {
-       current_tag=SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
-       return current_tag;
-     }
-       }
-   }
+  }
    
-
   // SHI07_INITIAL_QUANTITY_OF_A_TRAILER_FOR_A_SHIFT_IS_THE_END_QUANTITY_OF_THE_TRAILER_FOLLOWING_THE_PREVIOUS_SHIFT
-    
+  // Assured by the vector of trailer_quantity
     
 
   return SOLUTION_ADMISSIBLE;

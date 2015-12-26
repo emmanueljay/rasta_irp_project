@@ -44,20 +44,83 @@
 
 
 // 
-/** SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT
- * One shift, 2 operations, to close to each other
+/** DRI01_INTER_SHIFTS_DURATION
+ * 2 shifts, to close to each other
  */
-TEST(ConstraintActives, TODO) {
+TEST(Solution_Constraints_Actives, DRI01) {
   // Construction of Context
   Context context("../instances/Instance_V_1.1.xml");
 
+  // Construction of Solution for DRI01
+  std::vector<Shift>* shifts_l = context.solution()->shifts();
+  Driver const& first_driver_l = context.data()->drivers()->begin()->second;
+  int starting_time_l = first_driver_l.timeWindows(0).first;
+  int setup_time,time_l; 
+  int point_index;
+
+  // First shift
+  shifts_l->emplace_back(
+    shifts_l->size(), // index
+    first_driver_l.index(), // driver
+    first_driver_l.trailer(), // trailer
+    starting_time_l); // Start
+
+  shifts_l->emplace_back(
+    shifts_l->size(), // index
+    first_driver_l.index(), // driver
+    first_driver_l.trailer(), // trailer
+    shifts_l->at(0).end(*(context.data()))+1); // Start
 
   // Test 
   int shift_l,operation_l;
   EXPECT_EQ(rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)),
-    rip::tags::get_string(2 /** TODO **/));
+    rip::tags::get_string(DRI01_INTER_SHIFTS_DURATION));
 }
 
+/** TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME
+ * 2 shifts that overlaps No Way to test this one, as for now driver and truck 
+ * are bounded, and so, same that contraint before.
+ */
+// TEST(Solution_Constraints_Actives, TL01) {
+//   // Construction of Context
+//   Context context("../instances/Instance_V_1.1.xml");
+
+//   // Construction of Solution for TL01
+//   std::vector<Shift>* shifts_l = context.solution()->shifts();
+//   Driver const& first_driver_l = context.data()->drivers()->begin()->second;
+//   Driver const& second_driver_l = (++(context.data()->drivers()->begin()))->second;
+//   int starting_time_l = first_driver_l.timeWindows(0).first;
+//   int setup_time,time_l; 
+//   int point_index;
+
+//   // First shift
+//   shifts_l->emplace_back(
+//     shifts_l->size(), // index
+//     first_driver_l.index(), // driver
+//     first_driver_l.trailer(), // trailer
+//     starting_time_l); // Start
+
+//   // Operation in first shift
+//   point_index = 2;
+//   setup_time = rip::helpers::setup_time(point_index,*(context.data()));
+//   shifts_l->at(0).operations_ptr()->emplace_back(
+//     point_index, // point
+//     starting_time_l, // arrival
+//     264, // quantity
+//     setup_time // setup_time
+//     );
+
+//   shifts_l->emplace_back(
+//     shifts_l->size(), // index
+//     second_driver_l.index(), // driver
+//     first_driver_l.trailer(), // trailer
+//     starting_time_l+10); // Start
+
+//   // Test 
+//   int shift_l,operation_l;
+//   EXPECT_EQ(rip::tags::get_string(context.solution()->is_admissible(&shift_l,&operation_l)),
+//     rip::tags::get_string(TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME));
+// }
 
 
 // Step 3. Call RUN_ALL_TESTS() in main().
