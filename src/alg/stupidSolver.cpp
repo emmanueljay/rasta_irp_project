@@ -38,8 +38,10 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
   {
     if (i->start() >= starting_date) {
       // If the shift already exist
-      if (i->start() == starting_date && i->driver() == driver && i->trailer() == trailer) 
+      if (i->start() == starting_date && i->driver() == driver && i->trailer() == trailer) {
+        VLOG(3) << "We found an existing shift : " << i->index();
         return &(*i);
+      }
       // If the driver does not correspond
       else if (i->start() == starting_date)
         continue;
@@ -57,6 +59,7 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
       }
     }
   }
+  // If no shift existed before
   sol->shifts()->emplace_back( 
     sol->shifts()->size(), 
     driver, 
@@ -101,14 +104,17 @@ bool StupidSolver::solve() {
 
         tag = ERROR_NOT_ADMISSIBLE;
         while (tag != SOLUTION_ADMISSIBLE) {
+          VLOG(3) << "Finding an operation to insert";
           // Find Driver/Trailer
           int driver, trailer;
           driver = data.drivers().begin()->first; // (context_->data()->drivers()->begin() + (rand() % data.drivers().size()))->first;
           trailer = data.drivers().at(driver).trailer();
+          VLOG(3) << "We found driver " << driver << " and trailer " << trailer;
 
           // Find/Create Shift
           int tw;
           tw = find_index_tw(data.drivers().at(driver), data.unit(), t);
+          VLOG(3) << "We found the time window " << tw << " to insert or operation ";
 
           Shift* shift = find_or_create_shift(
             &sol, 
@@ -116,9 +122,11 @@ bool StupidSolver::solve() {
             trailer, 
             data.drivers().at(driver).timeWindows().at(tw).first);
 
-          VLOG(2) << "Adding on shift " << shift->index();
+          VLOG(3) << "Adding on shift " << shift->index();
 
-          int tag = sol.insert_max(shift, customer.second);
+          tag = sol.insert_max(shift, customer.second);
+          VLOG(3) << "After insertion, tag value is  " 
+            << rip::tags::get_string(tag);
         }
       }
     }

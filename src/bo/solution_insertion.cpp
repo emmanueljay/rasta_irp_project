@@ -57,11 +57,21 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
   admissibility = is_admissible(&err_shift,&err_opeations);
   if (SOLUTION_ADMISSIBLE == admissibility) {
     VLOG(2) << "Operation correctly inserted";
-    // We need to update the values in solution TODO !
-    // 
-    // 
-    // 
-    // 
+
+    // 4.We need to update the values in solution !
+    bool is_customer = !rip::helpers::is_source(point_index, data_m);
+    for (int t = (arrival_time + setup_time)/data_m.unit();
+         t < data_m.horizon()/data_m.unit(); ++t)
+    {
+      trailers_content_m[shifts_m[shift].trailer()][t] -= quantity;
+      if (is_customer)
+        customers_content_m[point_index][t] += quantity;
+      
+      if (trailers_content_m[shifts_m[shift].trailer()][t] < 0)
+        LOG(ERROR) << "Trailer content is negative on shift " 
+          << shifts_m[shift].index() << " and time " << t;
+    }
+    VLOG(2) << "Solution correctly updated";
     return SOLUTION_ADMISSIBLE;
   }
   else {
@@ -136,29 +146,66 @@ int Solution::smart_insert_operation(int shift, int point_index, int arrival_tim
 }
 
 
-
-
-
-
 int Solution::insert_max(Shift* shift, Customer const& customer) {
   VLOG(2) << "Insertion of customer " << customer.index() << " in shift " << shift->index();
-  int t = shift->end(data_m); 
+  
+  int tag;              // Tag value
+  int t;                // Value of time at the end of the shift
+  int initial_position; // Position of the end of the shift
+  
+  // 0. Getting initial values
+  if (shift->operations().size() == 0) {
+    t = shift->start();
+    initial_position = data_m.bases_index();
+  }
+  else {
+    t = shift->operations().rbegin()->departure();
+    initial_position = shift->operations().rbegin()->point();
+  }
 
-  // if the truck is empty, we fill it
-  // if (shift->driver())
+  // 1. If the truck is empty, we fill it
+  Trailer const& trailer = data_m.trailers().at(shift->trailer());
+  if (trailers_content_m[trailer.index()][t] < trailer.capacity()/2.0) { // Arbitrary
+    // Getting the source the most interesting
+    Source const& source = data_m.sources().at(
+      rip::helpers::nearest_source(initial_position, customer.index(), data_m));
+    
+    t += data_m.timeMatrices(initial_position,source.index());
 
+    // Filling the truck
+    tag = insert_operation(
+      shift->index(), 
+      source.index(), 
+      t, 
+      trailers_content_m[trailer.index()][t] - trailer.capacity());
 
+    // Exit if insertion was not possible
+    if (tag != SOLUTION_ADMISSIBLE)
+      return tag;
 
-  // Update the value of t
+    // Updating variables
+    t += source.setupTime();
+    initial_position = source.index();
+  }
+
+  // 2. Update the value of t
   // The truck is now full, put the maximum that you can in the customer, 
   // at the end of the shift using the insertion function
   
-
-  // DONT FORGET TO UPDATES THE QUANTITIES IN SOLUTION
+  t += data_m.timeMatrices(initial_position,customer.index());
   
+  // Filling the customer with the maxmimum possible
+  int quantity = std::min(
+    trailers_content_m[trailer.index()][t],
+    customer.capacity() - customers_content_m[customer.index()][t]);
 
-  // Return how it went.
-  return 1;
+  tag = insert_operation(
+    shift->index(), 
+    customer.index(), 
+    t, 
+    quantity);
+
+  return tag;
 }
 
 
