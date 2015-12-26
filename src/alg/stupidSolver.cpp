@@ -34,7 +34,7 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
   bool found = false;
   for (std::vector<Shift>::iterator i = sol->shifts()->begin();
        i != sol->shifts()->end();
-      ++i)
+       ++i)
   {
     if (i->start() >= starting_date) {
       // If the shift already exist
@@ -59,13 +59,14 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
       }
     }
   }
+
   // If no shift existed before
   sol->shifts()->emplace_back( 
     sol->shifts()->size(), 
     driver, 
     trailer,
     starting_date);
-  return &(sol->shifts()->at(0));
+  return &(sol->shifts()->at(sol->shifts()->size()-1));
 }
 
 
@@ -90,47 +91,55 @@ bool StupidSolver::solve() {
   int val = rand() % 10 + 1; // Between 1 and 10
 
   // Finding the time when customers are in need of oxygen.
-  for (std::pair<int,Customer> const& customer : data.customers()) {
-    VLOG(1) << "Treating Customer : " << customer.second.index();
-    std::vector<double> const& customer_content = sol.customers_content(customer.first);
-    
-    // Going through the time finding a drop in oxygen in the customer.
-    for (int t = 0; t < customer_content.size(); ++t)
-    {
-      if (customer_content[t] <= customer.second.safetyLevel()) {
+  // Going through the time finding a drop in oxygen in the customer.
+  for (int t = 0; t < data.horizon(); ++t) { 
+    for (std::pair<int,Customer> const& customer : data.customers()) {
+  
+      if (sol.customers_content(customer.first)[t] < customer.second.safetyLevel()) {
         VLOG(2) 
           << "We reach safety level for custumer " << customer.second.index() 
-          << " at time : " << t;
+          << " at time : " << t*data.unit();
 
-        tag = ERROR_NOT_ADMISSIBLE;
-        while (tag != SOLUTION_ADMISSIBLE) {
-          VLOG(3) << "Finding an operation to insert";
-          // Find Driver/Trailer
-          int driver, trailer;
-          driver = data.drivers().begin()->first; // (context_->data()->drivers()->begin() + (rand() % data.drivers().size()))->first;
-          trailer = data.drivers().at(driver).trailer();
-          VLOG(3) << "We found driver " << driver << " and trailer " << trailer;
+        // tag = ERROR_NOT_ADMISSIBLE;
+        // while (tag != SOLUTION_ADMISSIBLE) {
+        
+        VLOG(3) << "Finding an operation to insert";
+        // Find Driver/Trailer
+        int driver, trailer;
 
-          // Find/Create Shift
-          int tw;
-          tw = find_index_tw(data.drivers().at(driver), data.unit(), t);
-          VLOG(3) << "We found the time window " << tw << " to insert or operation ";
+        // TODO : EXTERNALISE THAT
+        int num_driver = (rand() % data.drivers().size());
+        auto driver_obj = data.drivers().begin();
+        for (int i = 0; i < num_driver; ++i) ++driver_obj;
 
-          Shift* shift = find_or_create_shift(
-            &sol, 
-            driver, 
-            trailer, 
-            data.drivers().at(driver).timeWindows().at(tw).first);
+        driver = driver_obj->first;
+        trailer = data.drivers().at(driver).trailer();
+        VLOG(3) << "We found driver " << driver << " and trailer " << trailer;
 
-          VLOG(3) << "Adding on shift " << shift->index();
+        // Find/Create Shift
+        int tw;
+        tw = find_index_tw(data.drivers().at(driver), data.unit(), t);
+        VLOG(3) << "We found the time window " << tw << " to insert or operation ";
 
-          tag = sol.insert_max(shift, customer.second);
-          VLOG(3) << "After insertion, tag value is  " 
-            << rip::tags::get_string(tag);
-        }
+        Shift* shift = find_or_create_shift(
+          &sol, 
+          driver, 
+          trailer, 
+          data.drivers().at(driver).timeWindows().at(tw).first);
+
+        VLOG(3) << "Adding on shift " << shift->index();
+
+        // TODO : MAKE IT DO SOMETHING WHEN DRIVING TIME TO BIG
+        tag = sol.insert_max(shift, customer.second);
+        VLOG(3) << "After insertion, tag value is  " 
+          << rip::tags::get_string(tag);
+
+        if (tag != SOLUTION_ADMISSIBLE)
+          return false;
+        // }
       }
     }
   }
 
-  return false;
+  return true;
 }

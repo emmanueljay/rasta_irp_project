@@ -21,15 +21,20 @@ int Solution::new_shift(int driver_id, int driver_work_id) {
 }
 
 
-int Solution::insert_operation(int shift, int point_index, int arrival_time, int quantity) {
+int Solution::insert_operation(int shift, int point_index, int arrival_time, int quantity, bool test_admissibility) {
   // 0. Check if the solution is admissible to begin with :
   int err_shift, err_opeations;
-  int admissibility = is_admissible(&err_shift,&err_opeations);
-  if (SOLUTION_ADMISSIBLE != admissibility) {
-    LOG(ERROR) << "We are inserting someting inside a solution that is not " 
-      << "admissible ! : " << rip::tags::get_string(admissibility)
-      << " for shift " << err_shift << " and ops " << err_opeations;
-    return admissibility;
+
+  int admissibility = SOLUTION_ADMISSIBLE;
+  if (test_admissibility) {
+    admissibility = is_admissible(&err_shift,&err_opeations);
+    
+    if (SOLUTION_ADMISSIBLE != admissibility) {
+      LOG(ERROR) << "We are inserting someting inside a solution that is not " 
+        << "admissible ! : " << rip::tags::get_string(admissibility)
+        << " for shift " << err_shift << " and ops " << err_opeations;
+      return admissibility;
+    }
   }
 
   /** Insertion of the operation **/
@@ -44,6 +49,8 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
 
   // 2. We construct the element at this place
   int setup_time = rip::helpers::setup_time(point_index,data_m);
+  VLOG(2) << "We insert the operation between " << arrival_time << " and " 
+    << arrival_time + setup_time;
   op = shifts_m[shift].operations_ptr()->emplace(
     op,           // Position to emplace in the vector of operations
     point_index,  // point
@@ -52,32 +59,54 @@ int Solution::insert_operation(int shift, int point_index, int arrival_time, int
     setup_time    // setup_time
     );
 
+
   // 3. We check if what we inserted is ok, if not we remove the element,
   // and return back the error code
-  admissibility = is_admissible(&err_shift,&err_opeations);
-  if (SOLUTION_ADMISSIBLE == admissibility) {
-    VLOG(2) << "Operation correctly inserted";
+  if (test_admissibility) {
+    admissibility = is_admissible(&err_shift,&err_opeations);
+    if (SOLUTION_ADMISSIBLE == admissibility) {
+      VLOG(2) << "Operation correctly inserted";
 
+      // 4.We need to update the values in solution !
+      bool is_customer = !rip::helpers::is_source(point_index, data_m);
+      for (int t = (arrival_time)/data_m.unit();
+           t < trailers_content_m[shifts_m[shift].trailer()].size(); ++t)
+      {
+        trailers_content_m[shifts_m[shift].trailer()][t] -= quantity;
+        if (is_customer)
+          customers_content_m[point_index][t] += quantity;
+        
+        if (trailers_content_m[shifts_m[shift].trailer()][t] < 0)
+          LOG(ERROR) << "Trailer content is negative on shift " 
+            << shifts_m[shift].index() << " and time " << t*data_m.unit()
+            << " with value " << trailers_content_m[shifts_m[shift].trailer()][t];
+      }
+      VLOG(2) << "Solution correctly updated";
+      return SOLUTION_ADMISSIBLE;
+    }
+    else {
+      VLOG(2) << "Fail with code : " << rip::tags::get_string(admissibility);
+      shifts_m[shift].operations_ptr()->erase(op);
+      return admissibility;
+    }
+  }
+  else {
     // 4.We need to update the values in solution !
+    // CODE COPY
     bool is_customer = !rip::helpers::is_source(point_index, data_m);
-    for (int t = (arrival_time + setup_time)/data_m.unit();
-         t < data_m.horizon()/data_m.unit(); ++t)
+    for (int t = (arrival_time)/data_m.unit();
+         t < trailers_content_m[shifts_m[shift].trailer()].size(); ++t)
     {
       trailers_content_m[shifts_m[shift].trailer()][t] -= quantity;
       if (is_customer)
         customers_content_m[point_index][t] += quantity;
       
-      if (trailers_content_m[shifts_m[shift].trailer()][t] < 0)
-        LOG(ERROR) << "Trailer content is negative on shift " 
-          << shifts_m[shift].index() << " and time " << t;
+      // if (trailers_content_m[shifts_m[shift].trailer()][t] < 0)
+      //   LOG(ERROR) << "Trailer content is negative on shift " 
+      //     << shifts_m[shift].index() << " and time " << t;
     }
     VLOG(2) << "Solution correctly updated";
-    return SOLUTION_ADMISSIBLE;
-  }
-  else {
-    VLOG(2) << "Fail with code : " << rip::tags::get_string(admissibility);
-    shifts_m[shift].operations_ptr()->erase(op);
-    return admissibility;
+    return is_admissible(&err_shift,&err_opeations);   
   }
 }
 
@@ -162,30 +191,42 @@ int Solution::insert_max(Shift* shift, Customer const& customer) {
     t = shift->operations().rbegin()->departure();
     initial_position = shift->operations().rbegin()->point();
   }
+  VLOG(3) << "Time of insertion : " << t << " at position " << initial_position;
 
   // 1. If the truck is empty, we fill it
   Trailer const& trailer = data_m.trailers().at(shift->trailer());
-  if (trailers_content_m[trailer.index()][t] < trailer.capacity()/2.0) { // Arbitrary
+  if (trailers_content_m[trailer.index()][t/data_m.unit()] < trailer.capacity()/2.0) { // Arbitrary
+    VLOG(3) << "Addition of an operation to fill the truck, because it is law in quantity";
     // Getting the source the most interesting
     Source const& source = data_m.sources().at(
       rip::helpers::nearest_source(initial_position, customer.index(), data_m));
     
     t += data_m.timeMatrices(initial_position,source.index());
 
+    // Here we suppose that we never have 
+    // customer.capacity() - customers_content_m[customer.index()][t/data_m.unit()]);
+    // <= trailers_content_m[trailer.index()][t/data_m.unit()]
+    
+    int quantity = std::min(
+      static_cast<double>(trailer.capacity()),
+      customer.capacity() - customers_content_m[customer.index()][t/data_m.unit()]);
+
     // Filling the truck
     tag = insert_operation(
       shift->index(), 
       source.index(), 
       t, 
-      trailers_content_m[trailer.index()][t] - trailer.capacity());
+      trailers_content_m[trailer.index()][t/data_m.unit()] - quantity,
+      false); // We don't test for admissibility
 
-    // Exit if insertion was not possible
-    if (tag != SOLUTION_ADMISSIBLE)
-      return tag;
+    // // Exit if insertion was not possible
+    // if (tag != SOLUTION_ADMISSIBLE)
+    //   return tag;
 
     // Updating variables
     t += source.setupTime();
     initial_position = source.index();
+    VLOG(3) << "Time of insertion : " << t << " at position " << initial_position;
   }
 
   // 2. Update the value of t
@@ -196,14 +237,15 @@ int Solution::insert_max(Shift* shift, Customer const& customer) {
   
   // Filling the customer with the maxmimum possible
   int quantity = std::min(
-    trailers_content_m[trailer.index()][t],
-    customer.capacity() - customers_content_m[customer.index()][t]);
+    trailers_content_m[trailer.index()][t/data_m.unit()],
+    customer.capacity() - customers_content_m[customer.index()][t/data_m.unit()]);
 
   tag = insert_operation(
     shift->index(), 
     customer.index(), 
     t, 
-    quantity);
+    quantity,
+    false);
 
   return tag;
 }

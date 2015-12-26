@@ -87,32 +87,36 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
    * We Do not test the run out avoidance, as it is the thing we are trying to construct.
    */
   
-  LOG(INFO) << "Testing admissibility of the solution";
+  VLOG(2) << "Testing admissibility of the solution";
   int current_tag; /// Will store the tag of a constraints if it is not satisfied
 
   for (std::vector<Shift>::iterator s = shifts_m.begin();
        s != shifts_m.end(); ++s)
   { 
     *current_shift_p = s - shifts_m.begin();
-    LOG(INFO) << "Treating Shift " << *current_shift_p;
+    VLOG(5) << "Treating Shift " << *current_shift_p;
     for (std::vector<Operation>::const_iterator o = s->operations().begin();
          o != s->operations().end(); ++o)
     {
       *current_operation_p = o - s->operations().begin();
-      LOG(INFO) << "Treating Operation " << *current_operation_p;
+      VLOG(5) << "Treating Operation " << *current_operation_p;
       // Check is the operation is OK
       current_tag = is_operation_admissible(*current_shift_p,*current_operation_p);
-      if (current_tag != OPERATION_ADMISSIBLE)
+      if (current_tag != OPERATION_ADMISSIBLE) {
+        VLOG(2) << "Result = " << rip::tags::get_string(current_tag);
         return current_tag;
+      }
     }
 
     // Check is the shift is OK
     current_tag = is_shift_admissible(*current_shift_p);
-    if (current_tag != SHIFT_ADMISSIBLE)
+    if (current_tag != SHIFT_ADMISSIBLE) {
+      VLOG(2) << "Result = " << rip::tags::get_string(current_tag);
       return current_tag;
+    }
   }
 
-  LOG(INFO) << "Treating constraints related to solution ";
+  VLOG(5) << "Treating constraints related to solution ";
 
   // DRI01_INTER_SHIFTS_DURATION
   // Start (s2) > end (s1) + MININTERSHIFTDURATION (d) OR start (s1) > end (s2) + MININTERSHIFTDURATION (d)
@@ -126,6 +130,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
         if ((s2.start() <= s1.end(data_m) + intShiftDur) &&
             (s1.start() <= s2.end(data_m) + intShiftDur)) {
           current_tag = DRI01_INTER_SHIFTS_DURATION;
+          VLOG(2) << "Result = " << rip::tags::get_string(current_tag);
           return current_tag;
         }
       }
@@ -141,6 +146,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
         if ((s2.start() <= s1.end(data_m)) && 
             (s1.start() <= s2.end(data_m))) {
           current_tag = TL01_DIFFERENT_SHIFTS_OF_THE_SAME_TRAILER_CANNOT_OVERLAP_IN_TIME;
+          VLOG(2) << "Result = " << rip::tags::get_string(current_tag);
           return current_tag;
         }
       }
@@ -155,6 +161,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
     {
       if (customers_content_m[customer.first][t] > customer.second.capacity()) {
         current_tag = DYN01_RESPECT_OF_TANK_CAPACITY_FOR_EACH_SITE;
+        VLOG(2) << "Result = " << rip::tags::get_string(current_tag);
         return current_tag;
       }
     }
@@ -177,6 +184,9 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
       if (0 > trailers_content_m[trailer.first][t] ||
           trailers_content_m[trailer.first][t] > trailer.second.capacity()) {
         current_tag = SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
+        VLOG(2) << "Result = " << rip::tags::get_string(current_tag) 
+          << " at time " << t*data_m.unit() << " with value " 
+          << trailers_content_m[trailer.first][t];
         return current_tag;
       }
     }
@@ -186,6 +196,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
   // Assured by the vector of trailer_quantity
     
 
+  VLOG(2) << "Result = " << rip::tags::get_string(SOLUTION_ADMISSIBLE);
   return SOLUTION_ADMISSIBLE;
 }
 
