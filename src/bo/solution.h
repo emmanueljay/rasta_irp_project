@@ -84,11 +84,17 @@ public:
    */
   int new_shift(int driver_id, int driver_work_id);
 
-  int insert_operation(int shift, int point_index, int arrival_time, int quantity, bool test_admissibility = true);
+  int insert_operation(Shift* shift, int point_index, int arrival_time, int quantity, bool test_admissibility = true);
 
   int smart_insert_operation(int shift, int point_index, int arrival_time, int quantity);
 
   int insert_max(Shift* shift, Customer const& customer);
+
+  void delete_shift(Shift* shift);
+  void delete_operation(Shift* shift, Operation* op);
+  void update_containers(int trailer, Operation const& op, bool reverse = false);
+  
+  void print() const ;
 };
 
 #endif // SOLUTION_H

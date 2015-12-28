@@ -54,16 +54,16 @@ TEST(Shifts_Insertions, Simple_test) {
   int s,tag,time_l;
 
   s = context.solution()->new_shift(first_driver_l.index(),0);
-
+  Shift* shift = &(context.solution()->shifts()->at(s));
   time_l = context.data()->timeMatrices(0,2) 
     + shifts_l->at(s).start();
-  tag = context.solution()->insert_operation(s, 2, time_l, 255);
+  tag = context.solution()->insert_operation(shift, 2, time_l, 255);
 
   // Test 
   EXPECT_EQ(rip::tags::get_string(SOLUTION_ADMISSIBLE),
     rip::tags::get_string(tag));
 
-  tag = context.solution()->insert_operation(s, 4, time_l+30, 255);
+  tag = context.solution()->insert_operation(shift, 4, time_l+30, 255);
   EXPECT_EQ(rip::tags::get_string(SHI02_ARRIVAL_AT_A_POINT_REQUIRES_TRAVELING_TIME_FROM_PREVIOUS_POINT),
     rip::tags::get_string(tag));
 

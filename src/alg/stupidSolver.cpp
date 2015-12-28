@@ -51,7 +51,7 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
         VLOG(3) << "Creating shift";
         i = sol->shifts()->emplace(
           i, 
-          sol->shifts()->size(), 
+          starting_date+driver, 
           driver, 
           trailer,
           starting_date);
@@ -62,7 +62,7 @@ Shift* find_or_create_shift(Solution* sol, int driver, int trailer, int starting
 
   // If no shift existed before
   sol->shifts()->emplace_back( 
-    sol->shifts()->size(), 
+    starting_date+driver, 
     driver, 
     trailer,
     starting_date);
@@ -92,52 +92,58 @@ bool StupidSolver::solve() {
 
   // Finding the time when customers are in need of oxygen.
   // Going through the time finding a drop in oxygen in the customer.
+  int random = rand();
   for (int t = 0; t < data.horizon(); ++t) { 
     for (std::pair<int,Customer> const& customer : data.customers()) {
-  
-      if (sol.customers_content(customer.first)[t] < customer.second.safetyLevel()) {
+      if (sol.customers_content(customer.first)[t] < customer.second.safetyLevel() ||
+          (random%100 == -1 && t*data.unit() > 1500 )) {
         VLOG(2) 
           << "We reach safety level for custumer " << customer.second.index() 
           << " at time : " << t*data.unit();
 
-        // tag = ERROR_NOT_ADMISSIBLE;
-        // while (tag != SOLUTION_ADMISSIBLE) {
+        tag = ERROR_NOT_ADMISSIBLE;
+        double counter = 0;
+        while (tag != SOLUTION_ADMISSIBLE && counter < 3.5) {
         
-        VLOG(3) << "Finding an operation to insert";
-        // Find Driver/Trailer
-        int driver, trailer;
+          VLOG(3) << "Finding an operation to insert -- Try number : " << counter;
+          // Find Driver/Trailer
+          int driver, trailer;
 
-        // TODO : EXTERNALISE THAT
-        int num_driver = (rand() % data.drivers().size());
-        auto driver_obj = data.drivers().begin();
-        for (int i = 0; i < num_driver; ++i) ++driver_obj;
+          int num_driver = (rand() % data.drivers().size());
+          auto driver_obj = data.drivers().begin();
+          for (int i = 0; i < num_driver; ++i) ++driver_obj;
 
-        driver = driver_obj->first;
-        trailer = data.drivers().at(driver).trailer();
-        VLOG(3) << "We found driver " << driver << " and trailer " << trailer;
+          driver = driver_obj->first;
+          trailer = data.drivers().at(driver).trailer();
+          VLOG(3) << "We found driver " << driver << " and trailer " << trailer;
 
-        // Find/Create Shift
-        int tw;
-        tw = find_index_tw(data.drivers().at(driver), data.unit(), t);
-        VLOG(3) << "We found the time window " << tw << " to insert or operation ";
+          // Find/Create Shift
+          int tw;
+          tw = find_index_tw(data.drivers().at(driver), data.unit(), t);
+          if (tw - counter >= 0) tw -= counter;
 
-        Shift* shift = find_or_create_shift(
-          &sol, 
-          driver, 
-          trailer, 
-          data.drivers().at(driver).timeWindows().at(tw).first);
+          VLOG(3) << "We found the time window " << tw << " to insert or operation ";
+          Shift* shift = find_or_create_shift(
+            &sol, 
+            driver, 
+            trailer, 
+            data.drivers().at(driver).timeWindows().at(tw).first);
 
-        VLOG(3) << "Adding on shift " << shift->index();
+          VLOG(3) << "Adding on shift " << shift->index();
 
-        // TODO : MAKE IT DO SOMETHING WHEN DRIVING TIME TO BIG
-        tag = sol.insert_max(shift, customer.second);
-        VLOG(3) << "After insertion, tag value is  " 
-          << rip::tags::get_string(tag);
+          // TODO : MAKE IT DO SOMETHING WHEN DRIVING TIME TO BIG
+          tag = sol.insert_max(shift, customer.second);
+          VLOG(3) << "After insertion, tag value is  " 
+            << rip::tags::get_string(tag);
 
-        if (tag != SOLUTION_ADMISSIBLE)
+          counter += 1.0/(data.drivers().size()*2);
+        }
+        if (tag != SOLUTION_ADMISSIBLE) {
+          sol.print();
           return false;
-        // }
+        }
       }
+      random = rand();
     }
   }
 

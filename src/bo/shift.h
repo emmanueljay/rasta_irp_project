@@ -4,6 +4,7 @@
 #define SHIFT_H
 
 #include "bo/operation.h"
+#include "bo/data.h"
 
 #include <vector> 
 
@@ -39,6 +40,8 @@ public:
         operations_m.end()-1)->departure()
       + data_p.timeMatrices((operations_m.end()-1)->point(),data_p.bases_index());
   }
+
+  void print() const;
 
 };
 

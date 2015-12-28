@@ -314,3 +314,12 @@ int Solution::is_operation_admissible (int s, int o)
   // The operation is OK
   return OPERATION_ADMISSIBLE;
 }
+
+
+void Solution::print() const {
+  LOG(INFO) << "Displaying Solution !";
+  for (Shift const& shift : shifts_m) 
+    shift.print();
+  return;
+}
+

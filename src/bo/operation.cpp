@@ -1,14 +1,11 @@
 /** @file */
 
 #include "bo/operation.h"
-
-// int Operation::is_admissible(
-//   std::vector<double> const& customer_content_p,
-//   double customer_max_capacity_p,
-//   std::vector<double> const& trailer_content_p,
-//   double driver_max_capacity_p)
-// {
+#include <glog/logging.h>
 
 
-//   return true;
-// }
+void Operation::print() const {
+  LOG(INFO) << "Operation at " << point_m << " : arrival at " << arrival_m 
+    << ", delivering quantity " << quantity_m << ", leaving at " << departure_m;
+  return;
+}
