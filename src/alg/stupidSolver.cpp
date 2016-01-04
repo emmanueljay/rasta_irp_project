@@ -78,6 +78,14 @@ bool StupidSolver::solve() {
   Solution sol(data);
   sol.initialize();
   int tag; // To contain admissibility of the solution
+  int driver = 0;
+  int trailer = 0;
+
+  // // Create empty shift on each time window : 
+  // for (std::pair<int,Driver> const& driver : data.drivers()) 
+  //   for (timeWindow const& tw : driver.second.timeWindows()) 
+  //     sol.new_shift(driver.first,tw);
+
 
   // First Way (double)
   double lower_bound = 0;
@@ -102,13 +110,23 @@ bool StupidSolver::solve() {
           << " at time : " << t*data.unit();
 
         tag = ERROR_NOT_ADMISSIBLE;
-        double counter = 0;
-        while (tag != SOLUTION_ADMISSIBLE && counter < 3.5) {
-        
-          VLOG(3) << "Finding an operation to insert -- Try number : " << counter;
-          // Find Driver/Trailer
-          int driver, trailer;
+        std::string list_error(""); 
+        double counter = -0.99;
+        while (tag != SOLUTION_ADMISSIBLE && counter < 20.5) {
 
+          if (sol.is_admissible(new int, new int) != SOLUTION_ADMISSIBLE) {
+            LOG(ERROR) << "At this point, we have a non admissible function :";
+            sol.print_trailer_content(trailer);            
+            sol.print_customer_content(customer.first);
+            sol.print();
+            LOG(FATAL) << "Solution broken";
+          }
+
+          VLOG(3) << "-----------------------------------------------------------";
+          VLOG(3) << "Finding an operation to insert -- Try number : " << counter;
+          VLOG(3) << "-----------------------------------------------------------";
+          
+          // Find Driver/Trailer
           int num_driver = (rand() % data.drivers().size());
           auto driver_obj = data.drivers().begin();
           for (int i = 0; i < num_driver; ++i) ++driver_obj;
@@ -132,13 +150,20 @@ bool StupidSolver::solve() {
           VLOG(3) << "Adding on shift " << shift->index();
 
           // TODO : MAKE IT DO SOMETHING WHEN DRIVING TIME TO BIG
-          tag = sol.insert_max(shift, customer.second);
+          bool clean = counter <= 0;
+          tag = sol.insert_max(shift, customer.second, clean);
           VLOG(3) << "After insertion, tag value is  " 
             << rip::tags::get_string(tag);
 
           counter += 1.0/(data.drivers().size()*2);
+
+          list_error += rip::tags::get_string(tag) + "\n";
+
+          // sol.print_customer_content(customer.first);
+          // sol.print_trailer_content(trailer); 
         }
         if (tag != SOLUTION_ADMISSIBLE) {
+          LOG(ERROR) << list_error;
           sol.print();
           return false;
         }
@@ -147,5 +172,7 @@ bool StupidSolver::solve() {
     }
   }
 
+  LOG(INFO) << "We found a solution !";
+  sol.print();
   return true;
 }

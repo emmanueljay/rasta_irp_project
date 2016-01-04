@@ -82,19 +82,20 @@ public:
    * @param  driver_work_id [description]
    * @return                id of the shift
    */
-  int new_shift(int driver_id, int driver_work_id);
+  int new_shift(int driver_id, timeWindow const& tw);
 
   int insert_operation(Shift* shift, int point_index, int arrival_time, int quantity, bool test_admissibility = true);
-
   int smart_insert_operation(int shift, int point_index, int arrival_time, int quantity);
 
-  int insert_max(Shift* shift, Customer const& customer);
+  int insert_max(Shift* shift, Customer const& customer, bool clean = false);
 
   void delete_shift(Shift* shift);
   void delete_operation(Shift* shift, Operation* op);
   void update_containers(int trailer, Operation const& op, bool reverse = false);
   
   void print() const ;
+  void print_customer_content(int id) const ;
+  void print_trailer_content(int id) const ;
 };
 
 #endif // SOLUTION_H

@@ -53,7 +53,7 @@ TEST(Shifts_Insertions, Simple_test) {
   Driver const& first_driver_l = context.data()->drivers()->begin()->second;
   int s,tag,time_l;
 
-  s = context.solution()->new_shift(first_driver_l.index(),0);
+  s = context.solution()->new_shift(first_driver_l.index(),first_driver_l.timeWindows(0));
   Shift* shift = &(context.solution()->shifts()->at(s));
   time_l = context.data()->timeMatrices(0,2) 
     + shifts_l->at(s).start();
@@ -79,7 +79,7 @@ TEST(Shifts_Insertions, Smart_Simple_test) {
   Driver const& first_driver_l = context.data()->drivers()->begin()->second;
   int s,tag,time_l;
 
-  s = context.solution()->new_shift(first_driver_l.index(),0);
+  s = context.solution()->new_shift(first_driver_l.index(),first_driver_l.timeWindows(0));
 
   time_l = context.data()->timeMatrices(0,2) 
     + shifts_l->at(s).start();

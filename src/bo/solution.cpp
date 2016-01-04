@@ -186,7 +186,7 @@ int Solution::is_admissible(int* current_shift_p, int* current_operation_p)
         current_tag = SHI06_TRAILERQUANTITY_CANNOT_BE_NEGATIVE_OR_EXCEED_CAPACITY_OF_THE_TRAILER;
         VLOG(2) << "Result = " << rip::tags::get_string(current_tag) 
           << " at time " << t*data_m.unit() << " with value " 
-          << trailers_content_m[trailer.first][t];
+          << trailers_content_m[trailer.first][t] << " for trailer " << trailer.first;
         return current_tag;
       }
     }
@@ -322,4 +322,25 @@ void Solution::print() const {
     shift.print();
   return;
 }
+
+void Solution::print_customer_content(int id) const {
+  LOG(INFO) << "Customer content number " << id;
+  for (int i = 0; i < customers_content_m.at(id).size(); ++i)
+  {
+    LOG_EVERY_N(INFO, customers_content_m.at(id).size()/10) 
+      << customers_content_m.at(id)[i];
+  }
+}
+
+void Solution::print_trailer_content(int id) const {
+  LOG(INFO) << "Trailer content number " << id;
+  for (int i = 0; i < trailers_content_m.at(id).size(); ++i)
+  {
+    LOG_EVERY_N(INFO, trailers_content_m.at(id).size()/10) 
+      << trailers_content_m.at(id)[i];
+  }
+}
+
+
+
 
